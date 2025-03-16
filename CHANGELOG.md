@@ -2,6 +2,9 @@
 
 ## untagged
 
+- Send SNI when connecting to outside servers
+  ([#524](https://github.com/chatmail/server/pull/524))
+
 - Pass through `original_content` instead of `content` in filtermail
   ([#509](https://github.com/chatmail/server/pull/509))
 
