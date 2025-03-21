@@ -37,8 +37,9 @@ You will need the following:
 
 - control over a domain through a DNS provider of your choice, 
 
-- Debian 12 machine with IPV4 and preferably also IPV6 addresses, 
-  1GB RAM, one slow CPU and maybe 10GB storage for a
+- Debian 12 machine with IPV4 and preferably also IPV6 addresses and
+  reachable SMTP/SUBMISSIONS/IMAPS/HTTPS ports. 
+  Machine needs 1GB RAM, one slow CPU and maybe 10GB storage for a
   few thousand active chatmail addresses, and 
 
 - a terminal window with password-less ssh root login to the domain;
