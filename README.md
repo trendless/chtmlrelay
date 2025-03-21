@@ -37,12 +37,12 @@ You will need the following:
 
 - control over a domain through a DNS provider of your choice, 
 
-- Debian 12 machine with IPV4 and preferably also IPV6 addresses and
+- a remote Debian 12 machine with IPV4 and preferably also IPV6 addresses and
   reachable SMTP/SUBMISSIONS/IMAPS/HTTPS ports. 
   Machine needs 1GB RAM, one slow CPU and maybe 10GB storage for a
-  few thousand active chatmail addresses, and 
+  few thousand active chatmail addresses,
 
-- a terminal window with password-less ssh root login to the domain;
+- a terminal window with password-less ssh root login to the remote machine;
   you must have set up ssh authentication and need to use an ed25519 key, 
   due to an [upstream bug in paramiko](https://github.com/paramiko/paramiko/issues/2191);
   you also need to add your private key to the local ssh-agent, 
