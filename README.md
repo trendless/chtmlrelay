@@ -262,8 +262,8 @@ While this file is present, account creation will be blocked.
 Port 443 multiplexes HTTPS, IMAP and SMTP using ALPN to redirect connections to ports 8443, 465 or 993.
 [acmetool](https://hlandau.github.io/acmetool/) listens on port 80 (http).
 
-Delta Chat apps will, however, discover all ports and configurations
-automatically by reading the [autoconfig XML file](https://www.ietf.org/archive/id/draft-bucksch-autoconfig-00.html) from the chatmail service.
+Chatmail-core based apps will, however, discover all ports and configurations
+automatically by reading the [autoconfig XML file](https://www.ietf.org/archive/id/draft-bucksch-autoconfig-00.html) from the chatmail server.
 
 ## Email authentication
 
@@ -350,9 +350,9 @@ to make sure you can connect with SSH.
 5. Now, point DNS to the new IP addresses.
 
    You can already remove the old IP addresses from DNS.
-   Existing Delta Chat users will still be able to connect
+   Existing Chatmail app users or bots will still be able to connect
    to the old server, send and receive messages,
-   but new users will fail to create new profiles
+   but new ones will fail to create new profiles
    with your chatmail server.
 
    If other servers try to deliver messages to your new server they will fail,
