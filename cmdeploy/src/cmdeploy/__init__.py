@@ -106,12 +106,14 @@ def _install_remote_venv_with_chatmaild(config) -> None:
     for fn in (
         "doveauth",
         "filtermail",
+        "filtermail-incoming",
         "echobot",
         "chatmail-metadata",
         "lastlogin",
     ):
+        execpath = fn if fn != "filtermail-incoming" else "filtermail"
         params = dict(
-            execpath=f"{remote_venv_dir}/bin/{fn}",
+            execpath=f"{remote_venv_dir}/bin/{execpath}",
             config_path=remote_chatmail_inipath,
             remote_venv_dir=remote_venv_dir,
             mail_domain=config.mail_domain,
@@ -541,7 +543,6 @@ def deploy_chatmail(config_path: Path, disable_mail: bool) -> None:
 
     server.group(name="Create vmail group", group="vmail", system=True)
     server.user(name="Create vmail user", user="vmail", group="vmail", system=True)
-    server.user(name="Create filtermail user", user="filtermail", system=True)
     server.group(name="Create opendkim group", group="opendkim", system=True)
     server.user(
         name="Create opendkim user",
