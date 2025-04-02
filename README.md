@@ -1,7 +1,7 @@
 
 <img width="800px" src="www/src/collage-top.png"/>
 
-# Chatmail relays for end-to-end encrypted instant e-mail
+# Chatmail relays for end-to-end encrypted e-mail
 
 Chatmail relay servers are interoperable Mail Transport Agents (MTAs) designed for: 
 
