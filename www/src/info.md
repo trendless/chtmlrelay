@@ -15,9 +15,10 @@ for the usage in chats, especially DeltaChat.
 
 - You may send up to {{ config.max_user_send_per_minute }} messages per minute.
 
-- Messages are unconditionally removed {{ config.delete_mails_after }} days after arriving on the server.
-
 - You can store up to [{{ config.max_mailbox_size }} messages on the server](https://delta.chat/en/help#what-happens-if-i-turn-on-delete-old-messages-from-server).
+
+- Messages are unconditionally removed latest {{ config.delete_mails_after }} days after arriving on the server.
+  Earlier, if storage may exceed otherwise.
 
 
 ### <a name="account-deletion"></a> Account deletion 
