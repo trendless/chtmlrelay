@@ -2,6 +2,9 @@
 
 ## untagged
 
+
+## 1.6.0 2025-04-11
+
 - Handle Port-25 connect errors more gracefully (common with VPNs)
   ([#552](https://github.com/chatmail/relay/pull/552))
 
