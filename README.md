@@ -538,7 +538,7 @@ you can add its IP address to the DNS.
 
 Here are some related projects that you may be interested in:
 
-- [Mox](https://github.com/-mjl/mox): A Golang email server.  [Work is in
+- [Mox](https://github.com/mjl-/mox): A Golang email server.  [Work is in
   progress](https://github.com/mjl-/mox/issues/251) to modify it to support all
   of the features and configuration settings required to operate as a chatmail
   relay.
