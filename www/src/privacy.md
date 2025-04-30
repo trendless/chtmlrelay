@@ -126,4 +126,4 @@ If you have any questions or concerns, please feel free to contact:
 
 ## Validity of this privacy policy 
 
-This data protection declaration is valid as of ***April 2025***. Due to the further development of our service and offers or due to changed legal or official requirements, it may become necessary to revise this data protection declaration from time to time.
+This data protection declaration is valid as of April 2025. Due to the further development of our service and offers or due to changed legal or official requirements, it may become necessary to revise this data protection declaration from time to time.
