@@ -1,43 +1,35 @@
 
+<img class="banner" src="collage-top.png"/>
+
 ## More information 
 
-{{ config.mail_domain }} provides a low-maintenance, resource efficient and 
-interoperable e-mail service for everyone. What's behind a `chatmail` is 
-effectively a normal e-mail address just like any other but optimized 
-for the usage in chats, especially DeltaChat.
+{{ config.mail_domain }} provides a low-maintenance, resource-efficient, interoperable, and end-to-end encrypted messaging relay for Canadians to use. `Chatmail` is effectively a standard email address that's optimized for verifiably secure instant messaging.
 
 
 ### Rate and storage limits 
 
-- Un-encrypted messages are blocked to recipients outside
-  {{config.mail_domain}} but setting up contact via [QR invite codes](https://delta.chat/en/help#howtoe2ee) 
-  allows your messages to pass freely to any outside recipients.
+- Unencrypted messages are blocked to recipients outside {{config.mail_domain}}. You can add other chatmail users via [QR invite codes](https://delta.chat/en/help#howtoe2ee), which create an encrypted connection between you and them so messages can be sent and received securely.
 
 - You may send up to {{ config.max_user_send_per_minute }} messages per minute.
 
-- You can store up to [{{ config.max_mailbox_size }} messages on the server](https://delta.chat/en/help#what-happens-if-i-turn-on-delete-old-messages-from-server).
+- The relay will allow you to temporarily cache up to [{{ config.max_mailbox_size }}iB of messages](https://delta.chat/en/help#what-happens-if-i-turn-on-delete-old-messages-from-server).
 
-- Messages are unconditionally removed latest {{ config.delete_mails_after }} days after arriving on the server.
-  Earlier, if storage may exceed otherwise.
+- Messages are unconditionally removed a maximum of {{ config.delete_mails_after }} days after arriving on the relay.
 
 
 ### <a name="account-deletion"></a> Account deletion 
 
-If you remove a {{ config.mail_domain }} profile from within the Delta Chat app, 
-then the according account on the server, along with all associated data,
-is automatically deleted {{ config.delete_inactive_users_after }} days afterwards. 
+{{ config.mail_domain }} accounts and any temporarily cached messages contained therein are automatically deleted after {{ config.delete_inactive_users_after }} days of no login activity. 
 
-If you use multiple devices 
-then you need to remove the according chat profile from each device
-in order for all account data to be removed on the server side. 
+If you wish to delete your account, you must remove it from ***all*** of the apps/devices on which it's setup.
 
-If you have any further questions or requests regarding account deletion
-please send a message from your account to {{ config.privacy_mail }}. 
+Deleted accounts ***cannot*** be restored.
+
+If you have any further questions, please send a message from your chatmail account to:
+
+ <a href="https://i.delta.chat/#0731BCC354B5982539B9EF3F7CCC3243F69EC865&a=6ajv3n8hy%40chtml.ca&n=chtml.ca%20custodian&i=4oQWjxE747gxA3TgxqaJkcuo&s=C0yzf6RHc1oeDhkOWskyNkGl"><img width=300 style="float: none;" src="qr-chat-with-{{config.mail_domain}}.png" /></a>
 
 
-### Who are the operators? Which software is running? 
+### What's running under the hood? 
 
-This chatmail provider is run by a small voluntary group of devs and sysadmins,
-who [publically develop chatmail provider setups](https://github.com/deltachat/chatmail).
-Chatmail setups aim to be very low-maintenance, resource efficient and 
-interoperable with any other standards-compliant e-mail service. 
+{{config.mail_domain}} employs free, open-source software assembled by a small group of voluntary devs who publicly develop the reference chatmail relay implementation, which aims to be low-maintenance, resource-efficient, and interoperable with other standards-compliant encrypted email services. 
