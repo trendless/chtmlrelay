@@ -8,7 +8,7 @@
 
 ### Rate and storage limits 
 
-- Unencrypted messages are blocked to recipients outside {{config.mail_domain}}. You can add other chatmail users via [QR invite codes](https://delta.chat/en/help#howtoe2ee), which create an encrypted connection between you and them so messages can be sent and received securely.
+- Unencrypted messages are blocked to recipients outside {{config.mail_domain}}. You can add other chatmail users by sharing [QR invite codes](https://delta.chat/en/help#howtoe2ee), which create an encrypted connection between you and them so messages can be sent and received securely.
 
 - You may send up to {{ config.max_user_send_per_minute }} messages per minute.
 
