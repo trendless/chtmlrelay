@@ -76,7 +76,7 @@ We process the following data and details:
 
 ### Account setup
 
-Creating an account happens in one of two ways on our chatmail relay: 
+Creating an account on this chatmail relay happens in one of two ways: 
 
 - by scanning a QR invitation token with a compatible app;
 
