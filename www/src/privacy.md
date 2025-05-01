@@ -55,7 +55,7 @@ This chatmail relay:
 
 - does not process IP addresses in relation to chatmail addresses.
 
-Due to the resulting lack of personal data processing this chatmail server may not require a privacy policy.
+Due to the resulting lack of personal data processing this chatmail relay may not require a privacy policy.
 
 ### Processing when using chatmail services
 
@@ -71,12 +71,12 @@ We process the following data and details:
 
 - Users can retrieve or delete all stored messages without intervention from the operators using standard IMAP client tools.
 
-- Users can connect to a "realtime relay service" to establish a peer-to-peer connection between users, allowing them to send and receive ephemeral messages which are never stored on the chatmail server.
+- Users can connect to a "realtime relay service" to establish a peer-to-peer connection between users, allowing them to send and receive ephemeral messages which are never stored on the chatmail relay.
 
 
 ### Account setup
 
-Creating an account happens in one of two ways on our mail servers: 
+Creating an account happens in one of two ways on our chatmail relay: 
 
 - by scanning a QR invitation token with a compatible app;
 
