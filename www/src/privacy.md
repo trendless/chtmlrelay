@@ -43,7 +43,7 @@ Ending these terms. You may end these terms with {{config.mail_domain}} at any t
 
 Chatmail relays exist to transmit end-to-end encrypted messages between users. As such, this chatmail relay neither asks for nor retains personal information. 
 
-A chatmail relay is unlike classic email servers (e.g., Hotmail/Outlook, Gmail, your ISP, etc) that collect and use personal data and can permanently store messages. A chatmail relay behaves more like Signal's servers, though chatmail doesn't know your phone number *and* it interoperates with other chatmail relays.
+A chatmail relay is unlike classic email servers (e.g., Hotmail/Outlook, Gmail, your ISP, etc) that collect and use personal data and can permanently store messages. A chatmail relay behaves more like Signal's servers, though chatmail relays don't know your phone number *and* they interoperate with other chatmail relays.
 
 This chatmail relay: 
 
