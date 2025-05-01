@@ -8,7 +8,7 @@ Welcome to instant, interoperable, secure, and [privacy-preserving](privacy.html
 <a class="cta-button" href="DCACCOUNT:https://{{ config.mail_domain }}/new">Get a {{config.mail_domain}} chat profile</a>
 
 If you're viewing this page on a device other than the one you want to use chatmail on,
-you can **scan this QR code** with your chatmail app (e.g., [Delta Chat](https://delta.chat/en/download), [ArcaneChat](https://arcanechat.me/#download), [etc](https://chatmail.at/clients):
+you can **scan this QR code** with your chatmail app (e.g., [Delta Chat](https://delta.chat/en/download), [ArcaneChat](https://arcanechat.me/#download), [etc](https://chatmail.at/clients)):
 
 <a href="DCACCOUNT:https://{{ config.mail_domain }}/new">
     <img width=300 style="float: none;" src="qr-chatmail-invite-{{config.mail_domain}}.png" /></a>
