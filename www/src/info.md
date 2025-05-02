@@ -1,9 +1,8 @@
 
 <img class="banner" src="collage-top.png"/>
 
-## More information 
 
-{{ config.mail_domain }} provides a low-maintenance, resource-efficient, interoperable, and end-to-end encrypted messaging relay for Canadians to use. `Chatmail` is effectively a standard email address that's optimized for verifiably secure instant messaging.
+{{ config.mail_domain }} provides a low-maintenance, resource-efficient, interoperable, and end-to-end encrypted messaging relay especially for Canadians to use. A `chatmail` account is a standard email address that's configured and optimized for verifiably secure instant messaging.
 
 
 ### Rate and storage limits 
