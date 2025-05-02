@@ -1,18 +1,17 @@
 
 <img class="banner" src="collage-top.png"/>
 
-# Terms of Use & Privacy Policy for {{config.mail_domain}} 
-
-Welcome to `{{config.mail_domain}}`, a Canadian chatmail relay operated by a small team on a voluntary basis. See [this list](https://chatmail.at/relays) for relays in other jurisdictions.
-
+# Terms of Use & Privacy Policy for {{config.mail_domain}}
 
 ## Terms of Use
 
 {{config.mail_domain}} utilizes security and end-to-end encryption to provide private messaging, and other services to users. You agree to our terms of service (“terms”) by using our relay and/or website (together, “services”).
 
-### About our services
+## About our services
 
-Minimum Age. You must be at least 13 years old to use our services. The minimum age to use our services without parental approval may be higher in your home country.
+### Minimum Age
+
+You must be at least 13 years old to use our services. The minimum age to use our services without parental approval may be higher in your home country.
 
 ### Legal and acceptable use
 
@@ -30,7 +29,7 @@ You use our services at your own risk and subject to the following disclaimers. 
 
 The {{config.mail_domain}} parties will not be liable to you for any lost profits or consequential, special, punitive, indirect, or incidental damages relating to, arising out of, or in any way in connection with our terms, us, or our services, even if the {{config.mail_domain}} parties have been advised of the possibility of such damages. Our aggregate liability relating to, arising out of, or in any way in connection with our terms, us, or our services will not exceed one hundred dollars ($100). The foregoing disclaimer of certain damages and limitation of liability will apply to the maximum extent permitted by applicable law. The laws of some jurisdictions may not allow the exclusion or limitation of certain damages, so some or all of the exclusions and limitations set forth above may not apply to you. Notwithstanding anything to the contrary in our terms, in such cases, the liability of the {{config.mail_domain}} parties will be limited to the fullest extent permitted by applicable law.
 
-### Availability of our services
+### Availability
 
 Our services may be interrupted, including for maintenance, upgrades, or network or equipment failures. We may discontinue some or all of our services, including certain features and the support for certain devices and platforms, at any time.
 
