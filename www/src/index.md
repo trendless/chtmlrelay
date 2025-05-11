@@ -4,7 +4,8 @@
 ## Dear [chatmail](https://chatmail.at) users and newcomers ... 
 
 Welcome to instant, interoperable, secure, and [privacy-preserving](privacy.html) messaging
-hosted entirely in Canada <img src="1f1e8-1f1e6-sm.png"/>  <sub><sup>*(for relays in other jurisdictions, see [this list](https://chatmail.at/relays))*</sup></sub>
+hosted entirely in Canada <img src="1f1e8-1f1e6-sm.png"/>
+<sub><sup>*(for relays in other jurisdictions, see [this list](https://chatmail.at/relays))*</sup></sub>
 
 <a class="cta-button" href="DCACCOUNT:https://{{ config.mail_domain }}/new">Get a {{config.mail_domain}} chat profile</a>
 
