@@ -2,6 +2,9 @@
 
 ## untagged
 
+- Increase nginx connection limits
+  ([#576](https://github.com/chatmail/relay/pull/576))
+
 - If `dns-utils` needs to be installed before cmdeploy run, apt update to make sure it works
   ([#560](https://github.com/chatmail/relay/pull/560))
 
@@ -10,6 +13,9 @@
 
 - Add config value after how many days large files are deleted
   ([#555](https://github.com/chatmail/relay/pull/555))
+
+- cmdeploy: push relay version to /etc/chatmail-version
+  ([#573](https://github.com/chatmail/relay/pull/573))
 
 - filtermail: allow partial body length in OpenPGP payloads
   ([#570](https://github.com/chatmail/relay/pull/570))
