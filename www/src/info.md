@@ -31,4 +31,4 @@ If you have any further questions, please send a message from your chatmail acco
 
 ### What's running under the hood? 
 
-{{config.mail_domain}} employs free, open-source software assembled by a small group of voluntary devs who publicly develop the reference chatmail relay implementation, which aims to be low-maintenance, resource-efficient, and interoperable with other standards-compliant encrypted email services. 
+{{config.mail_domain}} employs free, open-source software assembled by a small group of voluntary devs who publicly develop the reference chatmail relay implementation -- which aims to be low-maintenance, resource-efficient, and interoperable with other standards-compliant encrypted email services. 
