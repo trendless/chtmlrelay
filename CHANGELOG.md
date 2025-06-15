@@ -2,6 +2,15 @@
 
 ## untagged
 
+- Expire push notification tokens after 90 days
+  ([#583](https://github.com/chatmail/relay/pull/583))
+
+- Use official `mtail` binary instead of `mtail` package
+  ([#581](https://github.com/chatmail/relay/pull/581))
+
+- Reconfigure Dovecot imap-login service to high-performance mode
+  ([#578](https://github.com/chatmail/relay/pull/578))
+
 - Increase nginx connection limits
   ([#576](https://github.com/chatmail/relay/pull/576))
 
