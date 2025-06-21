@@ -1,7 +1,7 @@
 
 <img class="banner" src="collage-top.png"/>
 
-## Dear [chatmail](https://chatmail.at) users and newcomers, 
+## Hiya [chatmail](https://chatmail.at) users and newcomers! 
 
 Welcome to instant, interoperable, secure, and [privacy-preserving](privacy.html) messaging
 hosted entirely in Canada <img src="1f1e8-1f1e6-sm.png"/>
