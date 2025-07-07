@@ -14,7 +14,7 @@ Welcome to instant, interoperable, and [privacy-preserving](privacy.html) messag
 - [Delta Chat(Win/Mac/Android/iOS)](https://delta.chat/en/download)
 - [ArcaneChat (Android)](https://arcanechat.me/#download)
 
-     <sub>*... more at https://chatmail.at/clients*<sub>
+     <sub>*... more at [https://chatmail.at/clients](https://chatmail.at/clients)*<sub>
 
 #### 🖱 Click / Tap this button
 
@@ -22,7 +22,7 @@ Welcome to instant, interoperable, and [privacy-preserving](privacy.html) messag
 
     ***or*** scan this QR code with your app 📸 
 
-- <a href="DCACCOUNT:https://{{ config.mail_domain }}/new">
+    <a href="DCACCOUNT:https://{{ config.mail_domain }}/new">
     <img width=300 style="float: none;" src="qr-chatmail-invite-{{config.mail_domain}}.png" /></a>
 
 #### 🐣 Set your avatar and name
