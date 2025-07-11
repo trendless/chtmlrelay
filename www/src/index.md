@@ -9,14 +9,14 @@ Welcome to instant, interoperable, and [privacy-preserving](privacy.html) messag
 
 ## Start chatting in four steps.. 👇
 
-#### 📲 Get an app
+#### 1️⃣ 📲 Get an app
 
 - [Delta Chat(Win/Mac/Android/iOS)](https://delta.chat/en/download)
 - [ArcaneChat (Android)](https://arcanechat.me/#download)
 
      <sub>*... more at [https://chatmail.at/clients](https://chatmail.at/clients)*<sub>
 
-#### 🖱 Click / Tap this button
+#### 2️⃣ 🖱 Click / Tap this button
 
 - <a class="cta-button" href="DCACCOUNT:https://{{ config.mail_domain }}/new">Get started with {{config.mail_domain}}</a>
 
@@ -25,6 +25,6 @@ Welcome to instant, interoperable, and [privacy-preserving](privacy.html) messag
     <a href="DCACCOUNT:https://{{ config.mail_domain }}/new">
     <img width=300 style="float: none;" src="qr-chatmail-invite-{{config.mail_domain}}.png" /></a>
 
-#### 🐣 Set your avatar and name
+#### 3️⃣ 🐣 Set your avatar and name
 
-#### 💬 [Add people](https://delta.chat/en/help#howtoe2ee) and [join groups](https://delta.chat/en/help#groups) using QR invite codes
+#### 4️⃣ 💬 [Add people](https://delta.chat/en/help#howtoe2ee) and [join groups](https://delta.chat/en/help#groups) using QR invite codes
