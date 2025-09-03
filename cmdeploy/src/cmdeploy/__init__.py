@@ -676,26 +676,28 @@ def deploy_chatmail(config_path: Path, disable_mail: bool) -> None:
     from cmdeploy.cmdeploy import Out
 
     port_services = [
-        ("master", 25),
+        (["master", "smtpd"], 25),
         ("unbound", 53),
         ("acmetool", 80),
         ("imap-login", 143),
         ("nginx", 443),
-        ("master", 465),
-        ("master", 587),
+        (["master", "smtpd"], 465),
+        (["master", "smtpd"], 587),
         ("imap-login", 993),
         ("iroh-relay", 3340),
         ("nginx", 8443),
-        ("master", config.postfix_reinject_port),
-        ("master", config.postfix_reinject_port_incoming),
+        (["master", "smtpd"], config.postfix_reinject_port),
+        (["master", "smtpd"], config.postfix_reinject_port_incoming),
         ("filtermail", config.filtermail_smtp_port),
         ("filtermail", config.filtermail_smtp_port_incoming),
     ]
     for service, port in port_services:
+        print(f"Checking if port {port} is available for {service}...")
         running_service = host.get_fact(Port, port=port)
-        if running_service not in (service, None):
-            Out().red(f"Deploy failed: port {port} is occupied by: {running_service}")
-            exit(1)
+        if running_service:
+            if running_service not in service:
+                Out().red(f"Deploy failed: port {port} is occupied by: {running_service}")
+                exit(1)
 
     apt.packages(
         name="Install unbound",
