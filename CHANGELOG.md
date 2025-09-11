@@ -2,6 +2,9 @@
 
 ## untagged
 
+
+## 1.7.0 2025-09-11
+
 - Make www upload path configurable
   ([#618](https://github.com/chatmail/relay/pull/618))
 
