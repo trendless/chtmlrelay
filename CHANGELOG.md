@@ -2,6 +2,9 @@
 
 ## untagged
 
+- Update iroh-relay to 0.35.0
+  ([#650](https://github.com/chatmail/relay/pull/650))
+
 - Ignore all RCPT TO: parameters
   ([#651](https://github.com/chatmail/relay/pull/651))
 
