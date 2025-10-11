@@ -2,11 +2,35 @@
 
 ## untagged
 
+- Setup TURN server
+  ([#621](https://github.com/chatmail/relay/pull/621))
+
+- Update iroh-relay to 0.35.0
+  ([#650](https://github.com/chatmail/relay/pull/650))
+
+- Ignore all RCPT TO: parameters
+  ([#651](https://github.com/chatmail/relay/pull/651))
+
+- Add config parameter for Let's Encrypt ACME email
+  ([#663](https://github.com/chatmail/relay/pull/663))
+
+- Use max username length in newemail.py, not min
+  ([#648](https://github.com/chatmail/relay/pull/648))
+
+- Add startup for `fcgiwrap.service` because sometimes it did not start automatically.
+  ([#657](https://github.com/chatmail/relay/pull/657))
+
+- Add `cmdeploy init --force` command for recreating chatmail.ini
+  ([#656](https://github.com/chatmail/relay/pull/656))
+
 - Increase maxproc for reinjecting ports from 10 to 100
   ([#646](https://github.com/chatmail/relay/pull/646))
 
 - Allow ports 143 and 993 to be used by `dovecot` process
   ([#639](https://github.com/chatmail/relay/pull/639))
+
+- Add `--skip-dns-check` argument to `cmdeploy run` command, which disables DNS record checking before installation.
+  ([#661](https://github.com/chatmail/relay/pull/661))
 
 ## 1.7.0 2025-09-11
 
