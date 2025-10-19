@@ -2,14 +2,32 @@
 
 ## untagged
 
+- filtermail: run CPU-intensive handle_DATA in a thread pool executor
+  ([#676](https://github.com/chatmail/relay/pull/676))
+
+- don't use the complicated logging module in filtermail to exclude a potential source of errors. 
+  ([#674](https://github.com/chatmail/relay/pull/674))
+
+- Specify nginx.conf to only handle `mail_domain`, www, and mta-sts domains
+  ([#636](https://github.com/chatmail/relay/pull/636))
+
 - Setup TURN server
   ([#621](https://github.com/chatmail/relay/pull/621))
+
+- cmdeploy: make --ssh-host work with localhost
+  ([#659](https://github.com/chatmail/relay/pull/659))
 
 - Update iroh-relay to 0.35.0
   ([#650](https://github.com/chatmail/relay/pull/650))
 
+- filtermail: accept mails from Protonmail
+  ([#616](https://github.com/chatmail/relay/pull/655))
+
 - Ignore all RCPT TO: parameters
   ([#651](https://github.com/chatmail/relay/pull/651))
+
+- Increase opendkim DNS Timeout from 5 to 60 seconds
+  ([#672](https://github.com/chatmail/relay/pull/672))
 
 - Add config parameter for Let's Encrypt ACME email
   ([#663](https://github.com/chatmail/relay/pull/663))
