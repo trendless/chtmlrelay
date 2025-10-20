@@ -71,5 +71,6 @@ commands =
 [testenv]
 deps = pytest 
        pdbpp 
+       pytest-localserver
 commands = pytest -v -rsXx {posargs}
 """
