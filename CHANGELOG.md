@@ -2,6 +2,12 @@
 
 ## untagged
 
+- acmetool: use ECDSA keys instead of RSA
+  ([#689](https://github.com/chatmail/relay/pull/689))
+
+- Require TLS 1.2 for outgoing SMTP connections
+  ([#685](https://github.com/chatmail/relay/pull/685))
+
 - filtermail: run CPU-intensive handle_DATA in a thread pool executor
   ([#676](https://github.com/chatmail/relay/pull/676))
 
@@ -49,6 +55,13 @@
 
 - Add `--skip-dns-check` argument to `cmdeploy run` command, which disables DNS record checking before installation.
   ([#661](https://github.com/chatmail/relay/pull/661))
+
+- Rework expiry of message files and mailboxes in Python 
+  to only do a single iteration over sometimes millions of messages
+  instead of doing "find" commands that iterate 9 times over the messages. 
+  Provide an "fsreport" CLI for more fine grained analysis of message files. 
+  ([#637](https://github.com/chatmail/relay/pull/632))
+
 
 ## 1.7.0 2025-09-11
 
