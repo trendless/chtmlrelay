@@ -2,6 +2,9 @@
 
 ## untagged
 
+- don't deploy the website if there are merge conflicts in the www folder
+  ([#714](https://github.com/chatmail/relay/pull/714))
+
 - acmetool: use ECDSA keys instead of RSA
   ([#689](https://github.com/chatmail/relay/pull/689))
 
