@@ -2,8 +2,14 @@
 
 ## untagged
 
+- docs: move readme.md docs to sphinx documentation rendered at https://chatmail.at/doc/relay 
+  ([#711](https://github.com/chatmail/relay/pull/711))
+
 - acmetool: replace cronjob with a systemd timer
   ([#719](https://github.com/chatmail/relay/pull/719))
+
+- remove xstore@testrun.org from default passthrough recipients
+  ([#722](https://github.com/chatmail/relay/pull/722))
 
 - don't deploy the website if there are merge conflicts in the www folder
   ([#714](https://github.com/chatmail/relay/pull/714))
