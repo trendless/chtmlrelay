@@ -297,3 +297,48 @@ actually it is a problem with your TLS certificate.
 .. _nginx: https://nginx.org
 .. _pyinfra: https://pyinfra.com
 
+
+Architecture of cmdeploy
+------------------------
+
+cmdeploy is a Python program that uses the pyinfra library to deploy
+chatmail relays, with all the necessary software, configuration, and
+services.  The deployment process performs three primary types of
+operation:
+
+1. Installation of software, universal across all deployments.
+2. Configuration of software, with deploy-specific variations.
+3. Activation of services.
+
+The process is implemented through a family of "deployer" objects
+which all derive from a common ``Deployer`` base class, defined in
+cmdeploy/src/cmdeploy/deployer.py.  Each object provides
+implementation methods for the three stages -- install, configure, and
+activate.  The top-level procedure in ``deploy_chatmail()`` calls
+these methods for all the deployer objects, via the
+``Deployment.perform_stages()`` method, also defined in deployer.py.
+This first calls all the install methods, then the configure methods,
+then the activate methods.
+
+The ``Deployment`` class also implements support for a CMDEPLOY_STAGES
+environment variable, which allows limiting the process to specific
+stages.  Note that some deployers are stateful between the stages
+(this is one reason why they are implemented as objects), and that
+state will not get propagated between stages when run in separate
+invocations of cmdeploy.  This environment variable is intended for
+use in future revisions to support building Docker images with
+software pre-installed, and configuration of containers at run time
+from environment variables.
+
+The, ``install()`` methods for the deployer classes should use 'self'
+as little as possible, preferably not at all.  In particular,
+``install()`` methods should never depend on "config" data, such as
+the config dictionary in ``self.config`` or specific values like
+``self.mail_domain``.  This ensures that these methods can be used to
+perform generic installation operations that are applicable across
+multiple relay deployments, and therefore can be called in the process
+of building a general-purpose container image.
+
+Operations that start services for systemd-based deployments should
+only be called from the ``activate_impl()`` methods.  These methods
+will not be called in non-systemd container environments.
