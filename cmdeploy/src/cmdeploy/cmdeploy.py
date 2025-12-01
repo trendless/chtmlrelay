@@ -19,7 +19,7 @@ from packaging import version
 from termcolor import colored
 
 from . import dns, remote
-from .sshexec import SSHExec, LocalExec
+from .sshexec import LocalExec, SSHExec
 
 #
 # cmdeploy sub commands and options
@@ -95,7 +95,7 @@ def run_cmd(args, out):
     env["CHATMAIL_INI"] = args.inipath
     env["CHATMAIL_DISABLE_MAIL"] = "True" if args.disable_mail else ""
     env["CHATMAIL_REQUIRE_IROH"] = "True" if require_iroh else ""
-    deploy_path = importlib.resources.files(__package__).joinpath("deploy.py").resolve()
+    deploy_path = importlib.resources.files(__package__).joinpath("run.py").resolve()
     pyinf = "pyinfra --dry" if args.dry_run else "pyinfra"
 
     cmd = f"{pyinf} --ssh-user root {ssh_host} {deploy_path} -y"
@@ -238,7 +238,12 @@ def fmt_cmd_options(parser):
 def fmt_cmd(args, out):
     """Run formattting fixes on all chatmail source code."""
 
-    sources = [str(importlib.resources.files(x)) for x in ("chatmaild", "cmdeploy")]
+    chatmaild_dir = importlib.resources.files("chatmaild").resolve()
+    cmdeploy_dir = chatmaild_dir.joinpath(
+        "..", "..", "..", "cmdeploy", "src", "cmdeploy"
+    ).resolve()
+    sources = [str(chatmaild_dir), str(cmdeploy_dir)]
+
     format_args = [shutil.which("ruff"), "format"]
     check_args = [shutil.which("ruff"), "check"]
 
@@ -309,7 +314,7 @@ def add_ssh_host_option(parser):
         "--ssh-host",
         dest="ssh_host",
         help="Run commands on 'localhost', via '@docker', or on a specific SSH host "
-             "instead of chatmail.ini's mail_domain.",
+        "instead of chatmail.ini's mail_domain.",
     )
 
 
