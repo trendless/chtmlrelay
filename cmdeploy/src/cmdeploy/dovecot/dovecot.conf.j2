@@ -253,6 +253,7 @@ protocol imap {
 } 
 {% endif %}
 
+{% if not config.imap_compress %}
 # Hibernate IDLE users to save memory and CPU resources
 # NOTE: this will have no effect if imap_zlib plugin is used
 imap_hibernate_timeout = 30s
@@ -275,3 +276,4 @@ service imap-hibernate {
     group = $default_internal_group
   }
 }
+{% endif %}
