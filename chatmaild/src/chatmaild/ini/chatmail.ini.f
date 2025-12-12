@@ -45,7 +45,7 @@ passthrough_senders =
 # (space-separated, item may start with "@" to whitelist whole recipient domains)
 passthrough_recipients = echo@{mail_domain}
 
-# path to www directory - documented here: https://github.com/chatmail/relay/#custom-web-pages
+# path to www directory - documented here: https://chatmail.at/doc/relay/getting_started.html#custom-web-pages
 #www_folder = www
 
 #
@@ -98,6 +98,12 @@ acme_email =
 # Note that you need to manually cleanup these files
 # so use this option with caution on production servers. 
 imap_rawlog = false 
+
+# set to true if you want to enable the IMAP COMPRESS Extension,
+# which allows IMAP connections to be efficiently compressed.
+# WARNING: Enabling this makes it impossible to hibernate IMAP
+# processes which will result in much higher memory/RAM usage.
+imap_compress = false
 
 
 #

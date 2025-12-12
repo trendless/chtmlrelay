@@ -16,6 +16,9 @@ jobs:
     name: deploy on staging2.testrun.org, and run tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    environment:
+      name: staging2.testrun.org
+      url: https://staging2.testrun.org/
     concurrency:
       group: ci-${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: ${{ !contains(github.ref, '$GITHUB_REF') }}
@@ -69,6 +72,9 @@ jobs:
           rsync -avz acme-restore/acme root@staging2.testrun.org:/var/lib/ || true
           rsync -avz dkimkeys-restore/dkimkeys root@staging2.testrun.org:/etc/ || true
           ssh -o StrictHostKeyChecking=accept-new -v root@staging2.testrun.org chown root:root -R /var/lib/acme || true
+
+      - name: add hpk42 key to staging server
+        run: ssh root@staging2.testrun.org 'curl -s https://github.com/hpk42.keys >> .ssh/authorized_keys'
 
       - name: run deploy-chatmail offline tests 
         run: pytest --pyargs cmdeploy 
