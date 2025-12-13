@@ -18,7 +18,7 @@ Welcome to instant, interoperable, and [privacy-preserving](privacy.html) messag
 
 #### 2️⃣ 🖱 Click / Tap this button
 
-- <a class="cta-button" href="DCACCOUNT:https://{{ config.mail_domain }}/new">Get started with {{config.mail_domain}}</a>
+- <a class="cta-button" href="DCACCOUNT:https://{{ config.mail_domain }}/new">Get a {{config.mail_domain}} chat profile</a>
 
     ***or*** scan this QR code with your app 📸 
 
