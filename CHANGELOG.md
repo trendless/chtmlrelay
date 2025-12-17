@@ -1,6 +1,6 @@
 # Changelog for chatmail deployment 
 
-## untagged
+## 1.8.0 2025-12-12
 
 - Add imap_compress option to chatmail.ini
   ([#760](https://github.com/chatmail/relay/pull/760))
