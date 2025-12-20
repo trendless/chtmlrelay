@@ -1,4 +1,5 @@
-if odkim.internal_ip(ctx) == 1 then
+mtaname = odkim.get_mtasymbol(ctx, "{daemon_name}")
+if mtaname == "ORIGINATING" then
 	-- Outgoing message will be signed,
 	-- no need to look for signatures.
 	return nil
@@ -10,6 +11,7 @@ if nsigs == nil then
 end
 
 local valid = false
+local error_msg = "No valid DKIM signature found."
 for i = 1, nsigs do
 	sig = odkim.get_sighandle(ctx, i - 1)
 	sigres = odkim.sig_result(sig)
@@ -21,6 +23,8 @@ for i = 1, nsigs do
 	-- means the message is acceptable.
 	if sigres == 0 then
 		valid = true
+    else
+        error_msg = "DKIM signature is invalid, error code " .. tostring(sigres) .. ", search https://github.com/trusteddomainproject/OpenDKIM/blob/master/libopendkim/dkim.h#L108"
 	end
 end
 
@@ -31,7 +35,7 @@ if valid then
 		odkim.del_header(ctx, "DKIM-Signature", i)
 	end
 else
-	odkim.set_reply(ctx, "554", "5.7.1", "No valid DKIM signature found")
+	odkim.set_reply(ctx, "554", "5.7.1", error_msg)
 	odkim.set_result(ctx, SMFIS_REJECT)
 end
 
