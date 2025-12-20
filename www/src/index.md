@@ -1,25 +1,30 @@
 
 <img class="banner" src="collage-top.png"/>
 
-## Dear [Delta Chat](https://get.delta.chat) users and newcomers ... 
+## Hiya [chatmail](https://chatmail.at) users and newcomers! ✨
 
-{% if config.mail_domain != "nine.testrun.org" %}
-Welcome to instant, interoperable and [privacy-preserving](privacy.html) messaging :) 
-{% else %}
-Welcome to the default onboarding server ({{ config.mail_domain }}) 
-for Delta Chat users.  For details how it avoids storing personal information
-please see our [privacy policy](privacy.html). 
-{% endif %}
+Welcome to instant, interoperable, and [privacy-preserving](privacy.html) messaging hosted in Canada <img src="1f1e8-1f1e6-sm.png"/> 
 
-<a class="cta-button" href="DCACCOUNT:https://{{ config.mail_domain }}/new">Get a {{config.mail_domain}} chat profile</a>
+<sub><sup>*(for relays in other jurisdictions, see [this list](https://chatmail.at/relays))*</sup></sub>
 
-If you are viewing this page on a different device
-without a Delta Chat app,
-you can also **scan this QR code** with Delta Chat:
+## Start chatting in four steps.. 👇
 
-<a href="DCACCOUNT:https://{{ config.mail_domain }}/new">
+#### 1️⃣ 📲 Get an app
+
+- [Delta Chat(Win/Mac/Android/iOS)](https://delta.chat/en/download)
+- [ArcaneChat (Android)](https://arcanechat.me/#download)
+
+     <sub>*... more at [https://chatmail.at/clients](https://chatmail.at/clients)*<sub>
+
+#### 2️⃣ 🖱 Click / Tap this button
+
+- <a class="cta-button" href="DCACCOUNT:https://{{ config.mail_domain }}/new">Get a {{config.mail_domain}} chat profile</a>
+
+    ***or*** scan this QR code with your app 📸 
+
+    <a href="DCACCOUNT:https://{{ config.mail_domain }}/new">
     <img width=300 style="float: none;" src="qr-chatmail-invite-{{config.mail_domain}}.png" /></a>
 
-🐣 **Choose** your Avatar and Name
+#### 3️⃣ 🐣 Set your avatar and name
 
-💬 **Start** chatting with any Delta Chat contacts using [QR invite codes](https://delta.chat/en/help#howtoe2ee)
+#### 4️⃣ 💬 [Add people](https://delta.chat/en/help#howtoe2ee) and [join groups](https://delta.chat/en/help#groups) using QR invite codes
