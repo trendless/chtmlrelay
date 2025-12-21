@@ -84,6 +84,43 @@ code {
     font-weight: bold;
 }
 
+.qr-toggle {
+  display: none;
+}
+
+.qr-thumb {
+  height: 40px;
+  width: 40px;
+  vertical-align: middle;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+.qr-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.qr-toggle:checked ~ .qr-panel {
+  max-height: 300px;
+}
+
+.qr-panel img {
+  width: 300px;
+  margin-top: 0px;
+}
+
+.logo { 
+  color: #000;
+  vertical-align: middle;
+  margin-left: 5px;
+}
+
+.logo .inverse { 
+  fill: white; 
+}
+
 @media (prefers-color-scheme: dark) {
   body {
     background: #181a1b;
@@ -111,5 +148,11 @@ code {
     border-color: #ff6666;
     color: #ff6666;
     background: #222;
+  }
+  .logo { 
+    color: #fff; 
+  }
+  .logo .inverse { 
+    fill: black; 
   }
 }
