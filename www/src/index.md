@@ -28,7 +28,7 @@ Welcome to instant, interoperable, and [privacy-preserving](privacy.html) messag
 </div>
 
 <div class="qr-container">
-<a class="cta-button" href="DCACCOUNT:https://chatma.li/new">chatma.li 🇫🇷🇨</a>
+<a class="cta-button" href="DCACCOUNT:https://chatma.li/new">chatma.li 🇫🇷</a>
 <input type="checkbox" id="qrToggle2" class="qr-toggle">
 <label for="qrToggle2"> <img src="qr_code.png" alt="qr thumbnail" class="qr-thumb"> </label>
 <div class="qr-panel"> <img src="qr-chatmail-invite-chatma.li.png" alt="chatma.li qr code"></div>
