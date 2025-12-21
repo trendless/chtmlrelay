@@ -1,5 +1,5 @@
 
-<!--img class="banner" src="collage-top.png"/-->
+<!--img class="banner" src=".png"/-->
 
 # Welcome to [chatmail](https://chatmail.at)
 ---
@@ -27,14 +27,14 @@ instant, federated, [private](privacy.html) encrypted messaging
 
 ### 2) Get a chat profile:
 <div class="qr-container">
-<a class="cta-button" href="DCACCOUNT:https://{{ config.mail_domain }}/new">{{config.mail_domain}}</a>
+<a class="cta-button" href="DCACCOUNT:https://{{ config.mail_domain }}/new">{{config.mail_domain}} 🇫🇷</a>
 <input type="checkbox" id="qrToggle1" class="qr-toggle">
 <label for="qrToggle1"> <img src="qr_code.png" alt="QR thumbnail" class="qr-thumb"> </label>
 <div class="qr-panel"> <img src="qr-chatmail-invite-{{config.mail_domain}}.png" alt="Large QR code"></div>
 </div>
 
 <div class="qr-container">
-<a class="cta-button" href="DCACCOUNT:https://chtml.ca/new">chtml.ca</a>
+<a class="cta-button" href="DCACCOUNT:https://chtml.ca/new">chtml.ca 🇨🇦</a>
 <input type="checkbox" id="qrToggle2" class="qr-toggle">
 <label for="qrToggle2"> <img src="qr_code.png" alt="QR thumbnail" class="qr-thumb"> </label>
 <div class="qr-panel"> <img src="qr-chatmail-invite-chtml.ca.png" alt="Large QR code"></div>
