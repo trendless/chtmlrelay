@@ -29,14 +29,14 @@ instant, federated, [private](privacy.html) encrypted messaging
 <div class="qr-container">
 <a class="cta-button" href="DCACCOUNT:https://{{ config.mail_domain }}/new">{{config.mail_domain}} 🇫🇷</a>
 <input type="checkbox" id="qrToggle1" class="qr-toggle">
-<label for="qrToggle1"> <img src="qr_code.png" alt="QR thumbnail" class="qr-thumb"> </label>
+<label for="qrToggle1"> <img src="qr_code.png" alt="qr thumbnail" class="qr-thumb"> </label>
 <div class="qr-panel"> <img src="qr-chatmail-invite-{{config.mail_domain}}.png" alt="chatma.li qr code"></div>
 </div>
 
 <div class="qr-container">
 <a class="cta-button" href="DCACCOUNT:https://chtml.ca/new">chtml.ca 🇨🇦</a>
 <input type="checkbox" id="qrToggle2" class="qr-toggle">
-<label for="qrToggle2"> <img src="qr_code.png" alt="QR thumbnail" class="qr-thumb"> </label>
+<label for="qrToggle2"> <img src="qr_code.png" alt="qr thumbnail" class="qr-thumb"> </label>
 <div class="qr-panel"> <img src="qr-chatmail-invite-chtml.ca.png" alt="chtml.ca qr code"></div>
 </div>
 
