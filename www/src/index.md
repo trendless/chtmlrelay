@@ -9,7 +9,7 @@ Welcome to instant, interoperable, and [privacy-preserving](privacy.html) messag
 
 <br>
 
-## Start chatting in four steps.. 👇
+## Start chatting in two steps.. 👇
 
 #### 1️⃣ Get an app
 
@@ -33,10 +33,6 @@ Welcome to instant, interoperable, and [privacy-preserving](privacy.html) messag
 <label for="qrToggle2"> <img src="qr_code.png" alt="qr thumbnail" class="qr-thumb"> </label>
 <div class="qr-panel"> <img src="qr-chatmail-invite-chatma.li.png" alt="chatma.li qr code"></div>
 </div>
-
-#### 3️⃣ Set your avatar and name
-
-#### 4️⃣ [Add people](https://delta.chat/en/help#howtoe2ee) and [join groups](https://delta.chat/en/help#groups) using QR invite codes
 
 <br>
 
