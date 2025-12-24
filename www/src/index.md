@@ -40,6 +40,8 @@ instant, federated, [private](privacy.html) encrypted messaging
 <div class="qr-panel"> <img src="qr-chatmail-invite-chtml.ca.png" alt="chtml.ca qr code"></div>
 </div>
 
+<sub><sup>*(for relays in other jurisdictions, see [this list](https://chatmail.at/relays))*</sup></sub>
+
 <br>
 
 ## What to do next:
