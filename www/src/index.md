@@ -3,9 +3,7 @@
 
 ## Hiya [chatmail](https://chatmail.at) users and newcomers! ✨
 
-Welcome to instant, interoperable, and [privacy-preserving](privacy.html) messaging hosted in Canada
-
-<sub><sup>*(for relays in other jurisdictions, see [this list](https://chatmail.at/relays))*</sup></sub>
+Welcome to instant, interoperable, and [privacy-preserving](privacy.html) messaging
 
 <br>
 
@@ -33,6 +31,8 @@ Welcome to instant, interoperable, and [privacy-preserving](privacy.html) messag
 <label for="qrToggle2"> <img src="qr_code.png" alt="qr thumbnail" class="qr-thumb"> </label>
 <div class="qr-panel"> <img src="qr-chatmail-invite-chatma.li.png" alt="chatma.li qr code"></div>
 </div>
+
+<sub><sup>*(for relays in other jurisdictions, see [this list](https://chatmail.at/relays))*</sup></sub>
 
 <br>
 
