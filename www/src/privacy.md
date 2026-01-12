@@ -11,7 +11,7 @@
 
 ### Minimum Age
 
-You must be at least 13 years old to use our services. The minimum age to use our services without parental approval may be higher in your home country.
+You must be at least 16 years old to use our services. The minimum age to use our services without parental approval may be higher in your home country.
 
 ### Legal and acceptable use
 
