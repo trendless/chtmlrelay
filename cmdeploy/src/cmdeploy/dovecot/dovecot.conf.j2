@@ -168,6 +168,8 @@ service lmtp {
   }
 }
 
+lmtp_add_received_header = no
+
 service auth {
   unix_listener /var/spool/postfix/private/auth {
     mode = 0660
