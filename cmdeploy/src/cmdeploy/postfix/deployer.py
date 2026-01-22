@@ -1,4 +1,4 @@
-from pyinfra.operations import apt, files, systemd
+from pyinfra.operations import apt, files, server, systemd
 
 from cmdeploy.basedeploy import Deployer, get_resource
 
@@ -52,6 +52,15 @@ class PostfixDeployer(Deployer):
         )
         need_restart |= header_cleanup.changed
 
+        lmtp_header_cleanup = files.put(
+            src=get_resource("postfix/lmtp_header_cleanup"),
+            dest="/etc/postfix/lmtp_header_cleanup",
+            user="root",
+            group="root",
+            mode="644",
+        )
+        need_restart |= lmtp_header_cleanup.changed
+
         # Login map that 1:1 maps email address to login.
         login_map = files.put(
             src=get_resource("postfix/login_map"),
@@ -65,9 +74,17 @@ class PostfixDeployer(Deployer):
         restart_conf = files.put(
             name="postfix: restart automatically on failure",
             src=get_resource("service/10_restart.conf"),
-            dest="/etc/systemd/system/dovecot.service.d/10_restart.conf",
+            dest="/etc/systemd/system/postfix@.service.d/10_restart.conf",
         )
         self.daemon_reload = restart_conf.changed
+
+        # Validate postfix configuration before restart
+        if need_restart:
+            server.shell(
+                name="Validate postfix configuration",
+                # Extract stderr and quit with error if non-zero
+                commands=["""bash -c 'w=$(postconf 2>&1 >/dev/null); [[ -z "$w" ]] || { echo "$w"; false; }'"""],
+            )
         self.need_restart = need_restart
 
     def activate(self):

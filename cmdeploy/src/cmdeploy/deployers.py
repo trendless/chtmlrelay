@@ -502,22 +502,27 @@ class GithashDeployer(Deployer):
         except Exception:
             git_diff = ""
         files.put(
-            name="Upload chatmail relay git commiit hash",
+            name="Upload chatmail relay git commit hash",
             src=StringIO(git_hash + git_diff),
             dest="/etc/chatmail-version",
             mode="700",
         )
 
 
-def deploy_chatmail(config_path: Path, disable_mail: bool) -> None:
+def deploy_chatmail(config_path: Path, disable_mail: bool, website_only: bool) -> None:
     """Deploy a chat-mail instance.
 
     :param config_path: path to chatmail.ini
     :param disable_mail: whether to disable postfix & dovecot
+    :param website_only: if True, only deploy the website
     """
     config = read_config(config_path)
     check_config(config)
     mail_domain = config.mail_domain
+
+    if website_only:
+        Deployment().perform_stages([WebsiteDeployer(config)])
+        return
 
     if host.get_fact(Port, port=53) != "unbound":
         files.line(
@@ -536,6 +541,8 @@ def deploy_chatmail(config_path: Path, disable_mail: bool) -> None:
         (["master", "smtpd"], 587),
         (["imap-login", "dovecot"], 993),
         ("iroh-relay", 3340),
+        ("mtail", 3903),
+        ("dovecot-stats", 3904),
         ("nginx", 8443),
         (["master", "smtpd"], config.postfix_reinject_port),
         (["master", "smtpd"], config.postfix_reinject_port_incoming),
