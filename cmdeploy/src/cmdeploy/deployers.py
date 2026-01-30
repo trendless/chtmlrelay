@@ -553,7 +553,8 @@ def deploy_chatmail(config_path: Path, disable_mail: bool, website_only: bool) -
         files.line(
             name="Add 9.9.9.9 to resolv.conf",
             path="/etc/resolv.conf",
-            line="nameserver 9.9.9.9",
+            # Guard against resolv.conf missing a trailing newline (SolusVM bug).
+            line="\nnameserver 9.9.9.9",
         )
 
     port_services = [
