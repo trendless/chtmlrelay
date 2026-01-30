@@ -550,6 +550,18 @@ def deploy_chatmail(config_path: Path, disable_mail: bool, website_only: bool) -
         return
 
     if host.get_fact(Port, port=53) != "unbound":
+        server.shell(
+            name="Ensure resolv.conf ends with newline",
+            commands=[
+                "python3 - <<'PY'\n"
+                "from pathlib import Path\n"
+                "path = Path('/etc/resolv.conf')\n"
+                "data = path.read_bytes() if path.exists() else b''\n"
+                "if data and not data.endswith(b'\\n'):\n"
+                "    path.write_bytes(data + b'\\n')\n"
+                "PY"
+            ],
+        )
         files.line(
             name="Add 9.9.9.9 to resolv.conf",
             path="/etc/resolv.conf",
