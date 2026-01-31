@@ -141,6 +141,10 @@ def _configure_remote_venv_with_chatmaild(config) -> None:
 
 
 class UnboundDeployer(Deployer):
+    def __init__(self, config):
+        self.config = config
+        self.need_restart = False
+
     def install(self):
         # Run local DNS resolver `unbound`.
         # `resolvconf` takes care of setting up /etc/resolv.conf
@@ -177,6 +181,27 @@ class UnboundDeployer(Deployer):
                 "unbound-anchor -a /var/lib/unbound/root.key || true",
             ],
         )
+        if self.config.disable_ipv6:
+            files.directory(
+                path="/etc/unbound/unbound.conf.d",
+                present=True,
+                user="root",
+                group="root",
+                mode="755",
+            )
+            conf = files.put(
+                src=get_resource("unbound/unbound.conf.j2"),
+                dest="/etc/unbound/unbound.conf.d/chatmail.conf",
+                user="root",
+                group="root",
+                mode="644",
+            )
+        else:
+            conf = files.file(
+                path="/etc/unbound/unbound.conf.d/chatmail.conf",
+                present=False,
+            )
+        self.need_restart |= conf.changed
 
     def activate(self):
         server.shell(
@@ -191,6 +216,7 @@ class UnboundDeployer(Deployer):
             service="unbound.service",
             running=True,
             enabled=True,
+            restarted=self.need_restart,
         )
 
 
@@ -527,7 +553,8 @@ def deploy_chatmail(config_path: Path, disable_mail: bool, website_only: bool) -
         files.line(
             name="Add 9.9.9.9 to resolv.conf",
             path="/etc/resolv.conf",
-            line="nameserver 9.9.9.9",
+            # Guard against resolv.conf missing a trailing newline (SolusVM bug).
+            line="\nnameserver 9.9.9.9",
         )
 
     port_services = [
@@ -565,7 +592,7 @@ def deploy_chatmail(config_path: Path, disable_mail: bool, website_only: bool) -
         LegacyRemoveDeployer(),
         FiltermailDeployer(),
         JournaldDeployer(),
-        UnboundDeployer(),
+        UnboundDeployer(config),
         TurnDeployer(mail_domain),
         IrohDeployer(config.enable_iroh_relay),
         AcmetoolDeployer(config.acme_email, tls_domains),
