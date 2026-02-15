@@ -10,6 +10,7 @@ from pathlib import Path
 
 from chatmaild.config import read_config
 from pyinfra import facts, host, logger
+from pyinfra.facts import hardware
 from pyinfra.api import FactBase
 from pyinfra.facts.files import Sha256File
 from pyinfra.facts.systemd import SystemdEnabled
@@ -36,7 +37,7 @@ from .www import build_webpages, find_merge_conflict, get_paths
 
 class Port(FactBase):
     """
-    Returns the process occuping a port.
+    Returns the process occupying a port.
     """
 
     def command(self, port: int) -> str:
@@ -141,6 +142,10 @@ def _configure_remote_venv_with_chatmaild(config) -> None:
 
 
 class UnboundDeployer(Deployer):
+    def __init__(self, config):
+        self.config = config
+        self.need_restart = False
+
     def install(self):
         # Run local DNS resolver `unbound`.
         # `resolvconf` takes care of setting up /etc/resolv.conf
@@ -177,6 +182,27 @@ class UnboundDeployer(Deployer):
                 "unbound-anchor -a /var/lib/unbound/root.key || true",
             ],
         )
+        if self.config.disable_ipv6:
+            files.directory(
+                path="/etc/unbound/unbound.conf.d",
+                present=True,
+                user="root",
+                group="root",
+                mode="755",
+            )
+            conf = files.put(
+                src=get_resource("unbound/unbound.conf.j2"),
+                dest="/etc/unbound/unbound.conf.d/chatmail.conf",
+                user="root",
+                group="root",
+                mode="644",
+            )
+        else:
+            conf = files.file(
+                path="/etc/unbound/unbound.conf.d/chatmail.conf",
+                present=False,
+            )
+        self.need_restart |= conf.changed
 
     def activate(self):
         server.shell(
@@ -191,6 +217,7 @@ class UnboundDeployer(Deployer):
             service="unbound.service",
             running=True,
             enabled=True,
+            restarted=self.need_restart,
         )
 
 
@@ -527,8 +554,17 @@ def deploy_chatmail(config_path: Path, disable_mail: bool, website_only: bool) -
         files.line(
             name="Add 9.9.9.9 to resolv.conf",
             path="/etc/resolv.conf",
-            line="nameserver 9.9.9.9",
+            # Guard against resolv.conf missing a trailing newline (SolusVM bug).
+            line="\nnameserver 9.9.9.9",
         )
+
+    # Check if mtail_address interface is available (if configured)
+    if config.mtail_address and config.mtail_address not in ('127.0.0.1', '::1', 'localhost'):
+        ipv4_addrs = host.get_fact(hardware.Ipv4Addrs)
+        all_addresses = [addr for addrs in ipv4_addrs.values() for addr in addrs]
+        if config.mtail_address not in all_addresses:
+            Out().red(f"Deploy failed: mtail_address {config.mtail_address} is not available (VPN up?).\n")
+            exit(1)
 
     port_services = [
         (["master", "smtpd"], 25),
@@ -541,7 +577,7 @@ def deploy_chatmail(config_path: Path, disable_mail: bool, website_only: bool) -
         (["imap-login", "dovecot"], 993),
         ("iroh-relay", 3340),
         ("mtail", 3903),
-        ("dovecot-stats", 3904),
+        ("stats", 3904),
         ("nginx", 8443),
         (["master", "smtpd"], config.postfix_reinject_port),
         (["master", "smtpd"], config.postfix_reinject_port_incoming),
@@ -551,8 +587,9 @@ def deploy_chatmail(config_path: Path, disable_mail: bool, website_only: bool) -
     for service, port in port_services:
         print(f"Checking if port {port} is available for {service}...")
         running_service = host.get_fact(Port, port=port)
+        services = [service] if isinstance(service, str) else service
         if running_service:
-            if running_service not in service:
+            if running_service not in services:
                 Out().red(
                     f"Deploy failed: port {port} is occupied by: {running_service}"
                 )
@@ -565,7 +602,7 @@ def deploy_chatmail(config_path: Path, disable_mail: bool, website_only: bool) -
         LegacyRemoveDeployer(),
         FiltermailDeployer(),
         JournaldDeployer(),
-        UnboundDeployer(),
+        UnboundDeployer(config),
         TurnDeployer(mail_domain),
         IrohDeployer(config.enable_iroh_relay),
         AcmetoolDeployer(config.acme_email, tls_domains),
