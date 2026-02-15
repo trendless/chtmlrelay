@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import iniconfig
@@ -20,7 +21,8 @@ class Config:
     def __init__(self, inipath, params):
         self._inipath = inipath
         self.mail_domain = params["mail_domain"]
-        self.max_user_send_per_minute = int(params["max_user_send_per_minute"])
+        self.max_user_send_per_minute = int(params.get("max_user_send_per_minute", 60))
+        self.max_user_send_burst_size = int(params.get("max_user_send_burst_size", 10))
         self.max_mailbox_size = params["max_mailbox_size"]
         self.max_message_size = int(params.get("max_message_size", "31457280"))
         self.delete_mails_after = params["delete_mails_after"]
@@ -42,6 +44,8 @@ class Config:
         )
         self.mtail_address = params.get("mtail_address")
         self.disable_ipv6 = params.get("disable_ipv6", "false").lower() == "true"
+        self.addr_v4 = os.environ.get("CHATMAIL_ADDR_V4", "")
+        self.addr_v6 = os.environ.get("CHATMAIL_ADDR_V6", "")
         self.acme_email = params.get("acme_email", "")
         self.imap_rawlog = params.get("imap_rawlog", "false").lower() == "true"
         self.imap_compress = params.get("imap_compress", "false").lower() == "true"

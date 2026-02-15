@@ -101,6 +101,9 @@ def run_cmd(args, out):
     env["CHATMAIL_WEBSITE_ONLY"] = "True" if args.website_only else ""
     env["CHATMAIL_DISABLE_MAIL"] = "True" if args.disable_mail else ""
     env["CHATMAIL_REQUIRE_IROH"] = "True" if require_iroh else ""
+    if not args.dns_check_disabled:
+        env["CHATMAIL_ADDR_V4"] = remote_data.get("A") or ""
+        env["CHATMAIL_ADDR_V6"] = remote_data.get("AAAA") or ""
     deploy_path = importlib.resources.files(__package__).joinpath("run.py").resolve()
     pyinf = "pyinfra --dry" if args.dry_run else "pyinfra"
 
@@ -121,7 +124,7 @@ def run_cmd(args, out):
                 out.red("Website deployment failed.")
         elif retcode == 0:
             out.green("Deploy completed, call `cmdeploy dns` next.")
-        elif not remote_data["acme_account_url"]:
+        elif not args.dns_check_disabled and not remote_data["acme_account_url"]:
             out.red("Deploy completed but letsencrypt not configured")
             out.red("Run 'cmdeploy run' again")
             retcode = 0
