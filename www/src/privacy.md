@@ -157,8 +157,8 @@ If you have any questions or concerns, please feel free to contact:
 <div class="qr-container">
 <a class="cta-button" href="https://i.delta.chat/#437A67FC59E76D0632027DBB1A2B1CD87C67C1A5&i=FwGoQ8l55W_OljDGoPJK7kup&s=pCuREcbpjPbJF-bIGqqP0sF0&a=1tjaykajl%40chatma.li&n=chatma.li">chatma.li</a>
 <input type="checkbox" id="qrToggle2" class="qr-toggle">
-<label for="qrToggle2"> <img src="qr_code.png" alt="QR thumbnail" class="qr-thumb"> </label>
-<div class="qr-panel"> <img src="qr-chatmali-invite.png" alt="Large QR code"></div>
+<label for="qrToggle2"> <img src="qr_code.png" alt="qr thumbnail" class="qr-thumb"> </label>
+<div class="qr-panel"> <img src="qr-{{ config.mail_domain }}-invite.png" alt="{{ config.mail_domain }} invite qr code"></div>
 </div>
 
 ## Validity of these terms of use and privacy policy 
