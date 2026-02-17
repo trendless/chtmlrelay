@@ -2,7 +2,7 @@
 <img class="banner" src="collage-top.png"/>
 
 
-{{ config.mail_domain }} provides a low-maintenance, resource-efficient, interoperable, and end-to-end encrypted messaging relay especially for Canadians to use. A `chatmail` account is a standard email address that's configured and optimized for verifiably secure instant messaging.
+{{ config.mail_domain }} provides a low-maintenance, resource-efficient, interoperable, and end-to-end encrypted messaging relay. A `chatmail` account is a standard email address that's configured and optimized for verifiably secure instant messaging.
 
 
 ### Rate and storage limits 
@@ -26,7 +26,12 @@ Deleted accounts ***cannot*** be restored.
 
 If you have any further questions, please send a message from your chatmail account to:
 
- <a href="https://i.delta.chat/#0731BCC354B5982539B9EF3F7CCC3243F69EC865&a=6ajv3n8hy%40chtml.ca&n=chtml.ca%20custodian&i=4oQWjxE747gxA3TgxqaJkcuo&s=C0yzf6RHc1oeDhkOWskyNkGl"><img width=300 style="float: none;" src="qr-chat-with-{{config.mail_domain}}.png" /></a>
+ <div class="qr-container">
+ <a class="cta-button" href="https://i.delta.chat/#0731BCC354B5982539B9EF3F7CCC3243F69EC865&i=4oQWjxE747gxA3TgxqaJkcuo&s=1qIw62JtMcx9UYKV-VZt7jjy&a=6ajv3n8hy%40chtml.ca&n=chtml.ca">{{ config.mail_domain }}</a>
+ <input type="checkbox" id="qrToggle2" class="qr-toggle">
+ <label for="qrToggle2"> <img src="qr_code.png" alt="qr thumbnail" class="qr-thumb"> </label>
+ <div class="qr-panel"> <img src="qr-{{ config.mail_domain }}-invite.png" alt="{{ config.mail_domain }} invite qr code"></div>
+ </div>
 
 
 ### What's running under the hood? 

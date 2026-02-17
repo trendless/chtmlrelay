@@ -11,7 +11,7 @@
 
 ### Minimum Age
 
-You must be at least 13 years old to use our services. The minimum age to use our services without parental approval may be higher in your home country.
+You must be at least 16 years old to use our services. The minimum age to use our services without parental approval may be higher in your home country.
 
 ### Legal and acceptable use
 
@@ -154,7 +154,12 @@ Since no personal data is stored on our relay even in encrypted form, there is n
 
 If you have any questions or concerns, please feel free to contact:
 
-<a href="https://i.delta.chat/#0731BCC354B5982539B9EF3F7CCC3243F69EC865&a=6ajv3n8hy%40chtml.ca&n=chtml.ca%20custodian&i=4oQWjxE747gxA3TgxqaJkcuo&s=C0yzf6RHc1oeDhkOWskyNkGl"><img width=300 style="float: none;" src="qr-chat-with-{{config.mail_domain}}.png" /></a>
+ <div class="qr-container">
+ <a class="cta-button" href="https://i.delta.chat/#0731BCC354B5982539B9EF3F7CCC3243F69EC865&i=4oQWjxE747gxA3TgxqaJkcuo&s=1qIw62JtMcx9UYKV-VZt7jjy&a=6ajv3n8hy%40chtml.ca&n=chtml.ca">{{ config.mail_domain }}</a>
+ <input type="checkbox" id="qrToggle2" class="qr-toggle">
+ <label for="qrToggle2"> <img src="qr_code.png" alt="qr thumbnail" class="qr-thumb"> </label>
+ <div class="qr-panel"> <img src="qr-{{ config.mail_domain }}-invite.png" alt="{{ config.mail_domain }} invite qr code"></div>
+ </div>
 
 ## Validity of these terms of use and privacy policy 
 

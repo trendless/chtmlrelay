@@ -5,6 +5,8 @@
 ---
 Welcome to instant, interoperable, and [privacy-preserving](privacy.html) messaging
 
+---
+
 <br>
 
 ## Start chatting in two steps: 👇
@@ -38,12 +40,21 @@ Welcome to instant, interoperable, and [privacy-preserving](privacy.html) messag
 <a class="cta-button" href="DCACCOUNT:https://chatma.li/new">chatma.li 🇫🇷</a>
 <input type="checkbox" id="qrToggle2" class="qr-toggle">
 <label for="qrToggle2"> <img src="qr_code.png" alt="qr thumbnail" class="qr-thumb"> </label>
-<div class="qr-panel"> <img src="qr-chatmail-invite-chatma.li.png" alt="chatma.li qr code"></div>
+<div class="qr-panel"> <img src="https://chatma.li/qr-chatmail-invite-chatma.li.png" alt="chatma.li qr code"></div>
+</div>
+
+<div class="qr-container">
+<a class="cta-button" href="DCACCOUNT:https://chatmail.cc/new">chatmail.cc 🇸🇬</a>
+<input type="checkbox" id="qrToggle3" class="qr-toggle">
+<label for="qrToggle3"> <img src="qr_code.png" alt="qr thumbnail" class="qr-thumb"> </label>
+<div class="qr-panel"> <img src="https://chatmail.cc/qr-chatmail-invite-chatmail.cc.png" alt="chatmail.cc qr code"></div>
 </div>
 
 <sub><sup>*(for relays in other jurisdictions, see [this list](https://chatmail.at/relays))*</sup></sub>
 
 <br>
+
+---
 
 ## And then?
 - Connect to [people](https://delta.chat/en/help#howtoe2ee) and [groups](https://delta.chat/en/help#groups) using [QR invite codes](https://delta.chat/en/help#howtoe2ee)
