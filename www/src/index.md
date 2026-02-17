@@ -37,15 +37,15 @@ instant, federated, [private](privacy.html) encrypted messaging
 
 <div class="qr-container">
 <a class="cta-button" href="DCACCOUNT:https://chatmail.cc/new">chatmail.cc 🇸🇬</a>
-<input type="checkbox" id="qrToggle1" class="qr-toggle">
-<label for="qrToggle1"> <img src="qr_code.png" alt="qr thumbnail" class="qr-thumb"> </label>
+<input type="checkbox" id="qrToggle2" class="qr-toggle">
+<label for="qrToggle2"> <img src="qr_code.png" alt="qr thumbnail" class="qr-thumb"> </label>
 <div class="qr-panel"> <img src="https://chatmail.cc/qr-chatmail-invite-chatmail.cc.png" alt="chatmail.cc qr code"></div>
 </div>
 
 <div class="qr-container">
 <a class="cta-button" href="DCACCOUNT:https://chtml.ca/new">chtml.ca 🇨🇦</a>
-<input type="checkbox" id="qrToggle2" class="qr-toggle">
-<label for="qrToggle2"> <img src="qr_code.png" alt="qr thumbnail" class="qr-thumb"> </label>
+<input type="checkbox" id="qrToggle3" class="qr-toggle">
+<label for="qrToggle3"> <img src="qr_code.png" alt="qr thumbnail" class="qr-thumb"> </label>
 <div class="qr-panel"> <img src="https://chtml.ca/qr-chatmail-invite-chtml.ca.png" alt="chtml.ca qr code"></div>
 </div>
 
