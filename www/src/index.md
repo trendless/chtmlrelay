@@ -5,6 +5,8 @@
 ---
 encrypted, federated, and fast [private](privacy.html) messaging
 
+---
+
 <br>
 
 ## Get started in two steps:
@@ -37,19 +39,21 @@ encrypted, federated, and fast [private](privacy.html) messaging
 <a class="cta-button" href="DCACCOUNT:https://chatma.li/new">chatma.li 🇫🇷</a>
 <input type="checkbox" id="qrToggle2" class="qr-toggle">
 <label for="qrToggle2"> <img src="qr_code.png" alt="qr thumbnail" class="qr-thumb"> </label>
-<div class="qr-panel"> <img src="qr-chatmail-invite-chatma.li.png" alt="chatma.li qr code"></div>
+<div class="qr-panel"> <img src="https://chatma.li/qr-chatmail-invite-chatma.li.png" alt="chatma.li qr code"></div>
 </div>
 
 <div class="qr-container">
 <a class="cta-button" href="DCACCOUNT:https://chtml.ca/new">chtml.ca 🇨🇦</a>
 <input type="checkbox" id="qrToggle3" class="qr-toggle">
 <label for="qrToggle3"> <img src="qr_code.png" alt="qr thumbnail" class="qr-thumb"> </label>
-<div class="qr-panel"> <img src="qr-chatmail-invite-chtml.ca.png" alt="chtml.ca qr code"></div>
+<div class="qr-panel"> <img src="https://chtml.ca/qr-chatmail-invite-chtml.ca.png" alt="chtml.ca qr code"></div>
 </div>
 
 <sub><sup>*(for relays in other jurisdictions, see [this list](https://chatmail.at/relays))*</sup></sub>
 
 <br>
+
+---
 
 ## What to do next:
 - Connect to [people](https://delta.chat/en/help#howtoe2ee) and [groups](https://delta.chat/en/help#groups) using QR invite codes

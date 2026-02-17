@@ -23,7 +23,12 @@ Deleted accounts ***cannot*** be restored.
 
 If you have any further questions, please send a message from your chatmail account to:
 
- <a href=""><img width=300 style="float: none;" src="qr-chat-with-{{config.mail_domain}}.png" /></a>
+<div class="qr-container">
+<a class="cta-button" href="https://i.delta.chat/#354D6206BDD1CD366269D1E3A41DA4FC475385FD&i=GdzLDUU6y0xGSD_9Xlu9ZCrN&s=7yZJnaliEUrNIIWKRUj6_Dlm&a=qgy3vag2q%40chatmail.cc&n=chatmail.cc">{{ config.mail_domain }}</a>
+<input type="checkbox" id="qrToggle2" class="qr-toggle">
+<label for="qrToggle2"> <img src="qr_code.png" alt="qr thumbnail" class="qr-thumb"> </label>
+<div class="qr-panel"> <img src="qr-{{ config.mail_domain }}-invite.png" alt="{{ config.mail_domain }} invite qr code"></div>
+</div>
 
 
 ### What's running under the hood? 

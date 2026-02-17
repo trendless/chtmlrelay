@@ -152,7 +152,12 @@ Since no personal data is stored on our relay even in encrypted form, there is n
 
 If you have any questions or concerns, please feel free to contact:
 
-<a href=""><img width=300 style="float: none;" src="qr-chat-with-{{config.mail_domain}}.png" /></a>
+<div class="qr-container">
+<a class="cta-button" href="https://i.delta.chat/#354D6206BDD1CD366269D1E3A41DA4FC475385FD&i=GdzLDUU6y0xGSD_9Xlu9ZCrN&s=7yZJnaliEUrNIIWKRUj6_Dlm&a=qgy3vag2q%40chatmail.cc&n=chatmail.cc">{{ config.mail_domain }}</a>
+<input type="checkbox" id="qrToggle2" class="qr-toggle">
+<label for="qrToggle2"> <img src="qr_code.png" alt="qr thumbnail" class="qr-thumb"> </label>
+<div class="qr-panel"> <img src="qr-{{ config.mail_domain }}-invite.png" alt="{{ config.mail_domain }} invite qr code"></div>
+</div>
 
 ## Validity of these terms of use and privacy policy 
 
