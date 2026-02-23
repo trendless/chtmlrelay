@@ -19,6 +19,7 @@ from pyinfra.operations import apt, files, pip, server, systemd
 from cmdeploy.cmdeploy import Out
 
 from .acmetool import AcmetoolDeployer
+from .selfsigned.deployer import SelfSignedTlsDeployer
 from .basedeploy import (
     Deployer,
     Deployment,
@@ -569,8 +570,15 @@ def deploy_chatmail(config_path: Path, disable_mail: bool, website_only: bool) -
     port_services = [
         (["master", "smtpd"], 25),
         ("unbound", 53),
-        ("acmetool", 80),
+    ]
+    if config.tls_cert_mode == "acme":
+        port_services.append(("acmetool", 402))
+    port_services += [
         (["imap-login", "dovecot"], 143),
+        # acmetool previously listened on port 80,
+        # so don't complain during upgrade that moved it to port 402
+        # and gave the port to nginx.
+        (["acmetool", "nginx"], 80),
         ("nginx", 443),
         (["master", "smtpd"], 465),
         (["master", "smtpd"], 587),
@@ -597,6 +605,11 @@ def deploy_chatmail(config_path: Path, disable_mail: bool, website_only: bool) -
 
     tls_domains = [mail_domain, f"mta-sts.{mail_domain}", f"www.{mail_domain}"]
 
+    if config.tls_cert_mode == "acme":
+        tls_deployer = AcmetoolDeployer(config.acme_email, tls_domains)
+    else:
+        tls_deployer = SelfSignedTlsDeployer(mail_domain)
+
     all_deployers = [
         ChatmailDeployer(mail_domain),
         LegacyRemoveDeployer(),
@@ -605,7 +618,7 @@ def deploy_chatmail(config_path: Path, disable_mail: bool, website_only: bool) -
         UnboundDeployer(config),
         TurnDeployer(mail_domain),
         IrohDeployer(config.enable_iroh_relay),
-        AcmetoolDeployer(config.acme_email, tls_domains),
+        tls_deployer,
         WebsiteDeployer(config),
         ChatmailVenvDeployer(config),
         MtastsDeployer(),
