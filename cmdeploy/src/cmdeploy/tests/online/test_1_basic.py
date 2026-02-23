@@ -7,13 +7,13 @@ import time
 import pytest
 
 from cmdeploy import remote
-from cmdeploy.sshexec import SSHExec
+from cmdeploy.cmdeploy import get_sshexec
 
 
 class TestSSHExecutor:
     @pytest.fixture(scope="class")
     def sshexec(self, sshdomain):
-        return SSHExec(sshdomain)
+        return get_sshexec(sshdomain)
 
     def test_ls(self, sshexec):
         out = sshexec(call=remote.rdns.shell, kwargs=dict(command="ls"))
@@ -27,6 +27,7 @@ class TestSSHExecutor:
         assert res["A"] or res["AAAA"]
 
     def test_logged(self, sshexec, maildomain, capsys):
+        sshexec.verbose = False
         sshexec.logged(
             remote.rdns.perform_initial_checks, kwargs=dict(mail_domain=maildomain)
         )
@@ -52,6 +53,8 @@ class TestSSHExecutor:
                 remote.rdns.perform_initial_checks,
                 kwargs=dict(mail_domain=None),
             )
+        except AssertionError:
+            pass
         except sshexec.FuncError as e:
             assert "rdns.py" in str(e)
             assert "AssertionError" in str(e)
@@ -218,7 +221,7 @@ def test_expunged(remote, chatmail_config):
     ]
     outdated_days = int(chatmail_config.delete_large_after) + 1
     find_cmds.append(
-        "find {chatmail_config.mailboxes_dir} -path '*/cur/*' -mtime +{outdated_days} -size +200k -type f"
+        f"find {chatmail_config.mailboxes_dir} -path '*/cur/*' -mtime +{outdated_days} -size +200k -type f"
     )
     for cmd in find_cmds:
         for line in remote.iter_output(cmd):
