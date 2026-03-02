@@ -1,4 +1,5 @@
 import os
+import urllib.request
 
 from chatmaild.config import Config
 from pyinfra import host
@@ -51,10 +52,21 @@ class DovecotDeployer(Deployer):
         self.need_restart = False
 
 
+def _pick_url(primary, fallback):
+    try:
+        req = urllib.request.Request(primary, method="HEAD")
+        urllib.request.urlopen(req, timeout=10)
+        return primary
+    except Exception:
+        return fallback
+
+
 def _install_dovecot_package(package: str, arch: str):
     arch = "amd64" if arch == "x86_64" else arch
     arch = "arm64" if arch == "aarch64" else arch
-    url = f"https://github.com/chatmail/dovecot/releases/download/upstream%2F2.3.21%2Bdfsg1//dovecot-{package}_2.3.21%2Bdfsg1-3_{arch}.deb"
+    primary_url = f"https://download.chatmail.org/dovecot/dovecot-{package}_2.3.21%2Bdfsg1-3_{arch}.deb"
+    fallback_url = f"https://github.com/chatmail/dovecot/releases/download/upstream%2F2.3.21%2Bdfsg1/dovecot-{package}_2.3.21%2Bdfsg1-3_{arch}.deb"
+    url = _pick_url(primary_url, fallback_url)
     deb_filename = "/root/" + url.split("/")[-1]
 
     match (package, arch):
