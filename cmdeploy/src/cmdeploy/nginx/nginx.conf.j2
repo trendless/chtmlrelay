@@ -54,7 +54,7 @@ http {
 	include /etc/nginx/mime.types;
 	default_type application/octet-stream;
 
-	ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
+	ssl_protocols TLSv1.2 TLSv1.3;
 	ssl_prefer_server_ciphers on;
 	ssl_certificate {{ config.tls_cert_path }};
 	ssl_certificate_key {{ config.tls_key_path }};
@@ -79,12 +79,8 @@ http {
 			try_files $uri $uri/ =404;
 		}
 
-		location /metrics {
-			default_type text/plain;
-		}
-
 		location /new {
-{% if config.tls_cert_mode == "acme" %}
+{% if config.tls_cert_mode != "self" %}
 			if ($request_method = GET) {
 				# Redirect to Delta Chat,
 				# which will in turn do a POST request.
@@ -106,7 +102,7 @@ http {
 		#
 		# Redirects are only for browsers.
 		location /cgi-bin/newemail.py {
-{% if config.tls_cert_mode == "acme" %}
+{% if config.tls_cert_mode != "self" %}
 			if ($request_method = GET) {
 				return 301 dcaccount:https://{{ config.mail_domain }}/new;
 			}

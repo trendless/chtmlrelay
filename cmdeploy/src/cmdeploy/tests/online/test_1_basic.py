@@ -86,10 +86,8 @@ def test_remote(remote, imap_or_smtp):
 
 
 def test_use_two_chatmailservers(cmfactory, maildomain2):
-    ac1 = cmfactory.new_online_configuring_account(cache=False)
-    cmfactory.switch_maildomain(maildomain2)
-    ac2 = cmfactory.new_online_configuring_account(cache=False)
-    cmfactory.bring_accounts_online()
+    ac1 = cmfactory.get_online_account()
+    ac2 = cmfactory.get_online_account(domain=maildomain2)
     cmfactory.get_accepted_chat(ac1, ac2)
     domain1 = ac1.get_config("addr").split("@")[1]
     domain2 = ac2.get_config("addr").split("@")[1]
@@ -149,7 +147,7 @@ def test_reject_missing_dkim(cmsetup, maildata, from_addr):
     conn.starttls()
 
     with conn as s:
-        with pytest.raises(smtplib.SMTPDataError, match="No valid DKIM signature"):
+        with pytest.raises(smtplib.SMTPDataError, match="No DKIM signature found"):
             s.sendmail(from_addr=from_addr, to_addrs=recipient.addr, msg=msg)
 
 

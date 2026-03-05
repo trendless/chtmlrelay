@@ -5,7 +5,6 @@ along with command line option and subcommand parsing.
 
 import argparse
 import importlib.resources
-import importlib.util
 import os
 import pathlib
 import shutil
@@ -110,6 +109,9 @@ def run_cmd(args, out):
 
     cmd = f"{pyinf} --ssh-user root {ssh_host} {deploy_path} -y"
     if ssh_host in ["localhost", "@docker"]:
+        if ssh_host == "@docker":
+            env["CHATMAIL_NOPORTCHECK"] = "True"
+            env["CHATMAIL_NOSYSCTL"] = "True"
         cmd = f"{pyinf} @local {deploy_path} -y"
 
     if version.parse(pyinfra.__version__) < version.parse("3"):
@@ -117,24 +119,18 @@ def run_cmd(args, out):
         return 1
 
     try:
-        retcode = out.check_call(cmd, env=env)
+        out.check_call(cmd, env=env)
         if args.website_only:
-            if retcode == 0:
-                out.green("Website deployment completed.")
-            else:
-                out.red("Website deployment failed.")
-        elif retcode == 0:
-            out.green("Deploy completed, call `cmdeploy dns` next.")
+            out.green("Website deployment completed.")
         elif not args.dns_check_disabled and strict_tls and not remote_data["acme_account_url"]:
             out.red("Deploy completed but letsencrypt not configured")
             out.red("Run 'cmdeploy run' again")
-            retcode = 0
         else:
-            out.red("Deploy failed")
+            out.green("Deploy completed, call `cmdeploy dns` next.")
+        return 0
     except subprocess.CalledProcessError:
         out.red("Deploy failed")
-        retcode = 1
-    return retcode
+        return 1
 
 
 def dns_cmd_options(parser):
@@ -211,14 +207,8 @@ def test_cmd_options(parser):
 
 
 def test_cmd(args, out):
-    """Run local and online tests for chatmail deployment.
+    """Run local and online tests for chatmail deployment."""
 
-    This will automatically pip-install 'deltachat' if it's not available.
-    """
-
-    x = importlib.util.find_spec("deltachat")
-    if x is None:
-        out.check_call(f"{sys.executable} -m pip install deltachat")
     env = os.environ.copy()
     if args.ssh_host:
         env["CHATMAIL_SSH"] = args.ssh_host
@@ -336,7 +326,7 @@ def add_config_option(parser):
         "--config",
         dest="inipath",
         action="store",
-        default=Path("chatmail.ini"),
+        default=Path(os.environ.get("CHATMAIL_INI", "chatmail.ini")),
         type=Path,
         help="path to the chatmail.ini file",
     )

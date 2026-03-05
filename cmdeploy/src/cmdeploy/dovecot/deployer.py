@@ -1,3 +1,6 @@
+import os
+import urllib.request
+
 from chatmaild.config import Config
 from pyinfra import host
 from pyinfra.facts.server import Arch, Sysctl
@@ -9,6 +12,7 @@ from cmdeploy.basedeploy import (
     activate_remote_units,
     configure_remote_units,
     get_resource,
+    has_systemd,
 )
 
 
@@ -22,10 +26,11 @@ class DovecotDeployer(Deployer):
 
     def install(self):
         arch = host.get_fact(Arch)
-        if not host.get_fact(SystemdEnabled).get("dovecot.service"):
-            _install_dovecot_package("core", arch)
-            _install_dovecot_package("imapd", arch)
-            _install_dovecot_package("lmtpd", arch)
+        if has_systemd() and "dovecot.service" in host.get_fact(SystemdEnabled):
+            return  # already installed and running
+        _install_dovecot_package("core", arch)
+        _install_dovecot_package("imapd", arch)
+        _install_dovecot_package("lmtpd", arch)
 
     def configure(self):
         configure_remote_units(self.config.mail_domain, self.units)
@@ -37,7 +42,9 @@ class DovecotDeployer(Deployer):
         restart = False if self.disable_mail else self.need_restart
 
         systemd.service(
-            name="Disable dovecot for now" if self.disable_mail else "Start and enable Dovecot",
+            name="Disable dovecot for now"
+            if self.disable_mail
+            else "Start and enable Dovecot",
             service="dovecot.service",
             running=False if self.disable_mail else True,
             enabled=False if self.disable_mail else True,
@@ -47,10 +54,21 @@ class DovecotDeployer(Deployer):
         self.need_restart = False
 
 
+def _pick_url(primary, fallback):
+    try:
+        req = urllib.request.Request(primary, method="HEAD")
+        urllib.request.urlopen(req, timeout=10)
+        return primary
+    except Exception:
+        return fallback
+
+
 def _install_dovecot_package(package: str, arch: str):
     arch = "amd64" if arch == "x86_64" else arch
     arch = "arm64" if arch == "aarch64" else arch
-    url = f"https://download.delta.chat/dovecot/dovecot-{package}_2.3.21%2Bdfsg1-3_{arch}.deb"
+    primary_url = f"https://download.delta.chat/dovecot/dovecot-{package}_2.3.21%2Bdfsg1-3_{arch}.deb"
+    fallback_url = f"https://github.com/chatmail/dovecot/releases/download/upstream%2F2.3.21%2Bdfsg1/dovecot-{package}_2.3.21%2Bdfsg1-3_{arch}.deb"
+    url = _pick_url(primary_url, fallback_url)
     deb_filename = "/root/" + url.split("/")[-1]
 
     match (package, arch):
@@ -116,18 +134,19 @@ def _configure_dovecot(config: Config, debug: bool = False) -> (bool, bool):
 
     # as per https://doc.dovecot.org/2.3/configuration_manual/os/
     # it is recommended to set the following inotify limits
-    for name in ("max_user_instances", "max_user_watches"):
-        key = f"fs.inotify.{name}"
-        if host.get_fact(Sysctl)[key] > 65535:
-            # Skip updating limits if already sufficient
-            # (enables running in incus containers where sysctl readonly)
-            continue
-        server.sysctl(
-            name=f"Change {key}",
-            key=key,
-            value=65535,
-            persist=True,
-        )
+    if not os.environ.get("CHATMAIL_NOSYSCTL"):
+        for name in ("max_user_instances", "max_user_watches"):
+            key = f"fs.inotify.{name}"
+            if host.get_fact(Sysctl)[key] > 65535:
+                # Skip updating limits if already sufficient
+                # (enables running in incus containers where sysctl readonly)
+                continue
+            server.sysctl(
+                name=f"Change {key}",
+                key=key,
+                value=65535,
+                persist=True,
+            )
 
     timezone_env = files.line(
         name="Set TZ environment variable",

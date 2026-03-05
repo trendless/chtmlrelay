@@ -2,6 +2,7 @@
 Chat Mail pyinfra deploy.
 """
 
+import os
 import shutil
 import subprocess
 import sys
@@ -10,8 +11,8 @@ from pathlib import Path
 
 from chatmaild.config import read_config
 from pyinfra import facts, host, logger
-from pyinfra.facts import hardware
 from pyinfra.api import FactBase
+from pyinfra.facts import hardware
 from pyinfra.facts.files import Sha256File
 from pyinfra.facts.systemd import SystemdEnabled
 from pyinfra.operations import apt, files, pip, server, systemd
@@ -19,20 +20,22 @@ from pyinfra.operations import apt, files, pip, server, systemd
 from cmdeploy.cmdeploy import Out
 
 from .acmetool import AcmetoolDeployer
-from .selfsigned.deployer import SelfSignedTlsDeployer
 from .basedeploy import (
     Deployer,
     Deployment,
     activate_remote_units,
     configure_remote_units,
     get_resource,
+    has_systemd,
 )
 from .dovecot.deployer import DovecotDeployer
+from .external.deployer import ExternalTlsDeployer
 from .filtermail.deployer import FiltermailDeployer
 from .mtail.deployer import MtailDeployer
 from .nginx.deployer import NginxDeployer
 from .opendkim.deployer import OpendkimDeployer
 from .postfix.deployer import PostfixDeployer
+from .selfsigned.deployer import SelfSignedTlsDeployer
 from .www import build_webpages, find_merge_conflict, get_paths
 
 
@@ -66,6 +69,8 @@ def _build_chatmaild(dist_dir) -> None:
 
 
 def remove_legacy_artifacts():
+    if not has_systemd():
+        return
     # disable legacy doveauth-dictproxy.service
     if host.get_fact(SystemdEnabled).get("doveauth-dictproxy.service"):
         systemd.service(
@@ -118,7 +123,6 @@ def _install_remote_venv_with_chatmaild() -> None:
 
 def _configure_remote_venv_with_chatmaild(config) -> None:
     remote_base_dir = "/usr/local/lib/chatmaild"
-    remote_venv_dir = f"{remote_base_dir}/venv"
     remote_chatmail_inipath = f"{remote_base_dir}/chatmail.ini"
     root_owned = dict(user="root", group="root", mode="644")
 
@@ -129,16 +133,13 @@ def _configure_remote_venv_with_chatmaild(config) -> None:
         **root_owned,
     )
 
-    files.template(
-        src=get_resource("metrics.cron.j2"),
-        dest="/etc/cron.d/chatmail-metrics",
-        user="root",
-        group="root",
-        mode="644",
-        config={
-            "mailboxes_dir": config.mailboxes_dir,
-            "execpath": f"{remote_venv_dir}/bin/chatmail-metrics",
-        },
+    files.file(
+        path="/etc/cron.d/chatmail-metrics",
+        present=False,
+    )
+    files.file(
+        path="/var/www/html/metrics",
+        present=False,
     )
 
 
@@ -266,6 +267,9 @@ class WebsiteDeployer(Deployer):
             # if www_folder is a hugo page, build it
             if build_dir:
                 www_path = build_webpages(src_dir, build_dir, self.config)
+                if www_path is None:
+                    logger.warning("Web page build failed, skipping website deployment")
+                    return
             # if it is not a hugo page, upload it as is
             files.rsync(
                 f"{www_path}/", "/var/www/html", flags=["-avz", "--chown=www-data"]
@@ -300,7 +304,7 @@ class LegacyRemoveDeployer(Deployer):
             present=False,
         )
         # remove echobot if it is still running
-        if host.get_fact(SystemdEnabled).get("echobot.service"):
+        if has_systemd() and host.get_fact(SystemdEnabled).get("echobot.service"):
             systemd.service(
                 name="Disable echobot.service",
                 service="echobot.service",
@@ -536,6 +540,20 @@ class GithashDeployer(Deployer):
         )
 
 
+def get_tls_deployer(config, mail_domain):
+    """Select the appropriate TLS deployer based on config."""
+    tls_domains = [mail_domain, f"mta-sts.{mail_domain}", f"www.{mail_domain}"]
+
+    if config.tls_cert_mode == "acme":
+        return AcmetoolDeployer(config.acme_email, tls_domains)
+    elif config.tls_cert_mode == "self":
+        return SelfSignedTlsDeployer(mail_domain)
+    elif config.tls_cert_mode == "external":
+        return ExternalTlsDeployer(config.tls_cert_path, config.tls_key_path)
+    else:
+        raise ValueError(f"Unknown tls_cert_mode: {config.tls_cert_mode}")
+
+
 def deploy_chatmail(config_path: Path, disable_mail: bool, website_only: bool) -> None:
     """Deploy a chat-mail instance.
 
@@ -567,48 +585,44 @@ def deploy_chatmail(config_path: Path, disable_mail: bool, website_only: bool) -
             Out().red(f"Deploy failed: mtail_address {config.mtail_address} is not available (VPN up?).\n")
             exit(1)
 
-    port_services = [
-        (["master", "smtpd"], 25),
-        ("unbound", 53),
-    ]
-    if config.tls_cert_mode == "acme":
-        port_services.append(("acmetool", 402))
-    port_services += [
-        (["imap-login", "dovecot"], 143),
-        # acmetool previously listened on port 80,
-        # so don't complain during upgrade that moved it to port 402
-        # and gave the port to nginx.
-        (["acmetool", "nginx"], 80),
-        ("nginx", 443),
-        (["master", "smtpd"], 465),
-        (["master", "smtpd"], 587),
-        (["imap-login", "dovecot"], 993),
-        ("iroh-relay", 3340),
-        ("mtail", 3903),
-        ("stats", 3904),
-        ("nginx", 8443),
-        (["master", "smtpd"], config.postfix_reinject_port),
-        (["master", "smtpd"], config.postfix_reinject_port_incoming),
-        ("filtermail", config.filtermail_smtp_port),
-        ("filtermail", config.filtermail_smtp_port_incoming),
-    ]
-    for service, port in port_services:
-        print(f"Checking if port {port} is available for {service}...")
-        running_service = host.get_fact(Port, port=port)
-        services = [service] if isinstance(service, str) else service
-        if running_service:
-            if running_service not in services:
-                Out().red(
-                    f"Deploy failed: port {port} is occupied by: {running_service}"
-                )
-                exit(1)
+    if not os.environ.get("CHATMAIL_NOPORTCHECK"):
+        port_services = [
+            (["master", "smtpd"], 25),
+            ("unbound", 53),
+        ]
+        if config.tls_cert_mode == "acme":
+            port_services.append(("acmetool", 402))
+        port_services += [
+            (["imap-login", "dovecot"], 143),
+            # acmetool previously listened on port 80,
+            # so don't complain during upgrade that moved it to port 402
+            # and gave the port to nginx.
+            (["acmetool", "nginx"], 80),
+            ("nginx", 443),
+            (["master", "smtpd"], 465),
+            (["master", "smtpd"], 587),
+            (["imap-login", "dovecot"], 993),
+            ("iroh-relay", 3340),
+            ("mtail", 3903),
+            ("stats", 3904),
+            ("nginx", 8443),
+            (["master", "smtpd"], config.postfix_reinject_port),
+            (["master", "smtpd"], config.postfix_reinject_port_incoming),
+            ("filtermail", config.filtermail_smtp_port),
+            ("filtermail", config.filtermail_smtp_port_incoming),
+        ]
+        for service, port in port_services:
+            print(f"Checking if port {port} is available for {service}...")
+            running_service = host.get_fact(Port, port=port)
+            services = [service] if isinstance(service, str) else service
+            if running_service:
+                if running_service not in services:
+                    Out().red(
+                        f"Deploy failed: port {port} is occupied by: {running_service}"
+                    )
+                    exit(1)
 
-    tls_domains = [mail_domain, f"mta-sts.{mail_domain}", f"www.{mail_domain}"]
-
-    if config.tls_cert_mode == "acme":
-        tls_deployer = AcmetoolDeployer(config.acme_email, tls_domains)
-    else:
-        tls_deployer = SelfSignedTlsDeployer(mail_domain)
+    tls_deployer = get_tls_deployer(config, mail_domain)
 
     all_deployers = [
         ChatmailDeployer(mail_domain),

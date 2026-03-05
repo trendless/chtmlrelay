@@ -109,10 +109,6 @@ short overview of ``chatmaild`` services:
    is contacted by Dovecot when a user logs in and stores the date of
    the login.
 
--  `metrics <https://github.com/chatmail/relay/blob/main/chatmaild/src/chatmaild/metrics.py>`_
-   collects some metrics and displays them at
-   ``https://example.org/metrics``.
-
 ``www/``
 ~~~~~~~~~
 
@@ -142,11 +138,9 @@ Chatmail relay dependency diagram
         nginx-internal --- autoconfig.xml;
         certs-nginx[("`TLS certs
         /var/lib/acme`")] --> nginx-internal;
-        systemd-timer --- chatmail-metrics;
         systemd-timer --- acmetool;
         systemd-timer --- chatmail-expire-daily;
         systemd-timer --- chatmail-fsreport-daily;
-        chatmail-metrics --- website;
         acmetool --> certs[("`TLS certs
         /var/lib/acme`")];
         nginx-external --- |993|dovecot;
@@ -307,6 +301,11 @@ from the host that has open port 25 to verify that certificate is valid.
 When providing a TLS certificate to your chatmail relay server, make
 sure to provide the full certificate chain and not just the last
 certificate.
+
+If you use an external certificate manager (e.g. Traefik or certbot),
+set ``tls_external_cert_and_key`` in ``chatmail.ini``
+to provide the certificate and key paths.
+See :ref:`external-tls` for details.
 
 If you are running an Exim server and don’t see incoming connections
 from a chatmail relay server in the logs, make sure ``smtp_no_mail`` log
