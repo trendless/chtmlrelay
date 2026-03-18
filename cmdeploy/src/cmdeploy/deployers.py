@@ -498,10 +498,6 @@ class ChatmailDeployer(Deployer):
             name="Install rsync",
             packages=["rsync"],
         )
-        apt.packages(
-            name="Ensure cron is installed",
-            packages=["cron"],
-        )
 
     def configure(self):
         # This file is used by auth proxy.
