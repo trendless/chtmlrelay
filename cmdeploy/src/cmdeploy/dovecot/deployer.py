@@ -1,19 +1,31 @@
+import io
 import os
 import urllib.request
 
 from chatmaild.config import Config
 from pyinfra import host
+from pyinfra.facts.deb import DebPackages
 from pyinfra.facts.server import Arch, Sysctl
-from pyinfra.facts.systemd import SystemdEnabled
 from pyinfra.operations import apt, files, server, systemd
 
 from cmdeploy.basedeploy import (
     Deployer,
     activate_remote_units,
+    blocked_service_startup,
     configure_remote_units,
     get_resource,
-    has_systemd,
 )
+
+DOVECOT_VERSION = "2.3.21+dfsg1-3"
+
+DOVECOT_SHA256 = {
+    ("core", "amd64"): "dd060706f52a306fa863d874717210b9fe10536c824afe1790eec247ded5b27d",
+    ("core", "arm64"): "e7548e8a82929722e973629ecc40fcfa886894cef3db88f23535149e7f730dc9",
+    ("imapd", "amd64"): "8d8dc6fc00bbb6cdb25d345844f41ce2f1c53f764b79a838eb2a03103eebfa86",
+    ("imapd", "arm64"): "178fa877ddd5df9930e8308b518f4b07df10e759050725f8217a0c1fb3fd707f",
+    ("lmtpd", "amd64"): "2f69ba5e35363de50962d42cccbfe4ed8495265044e244007d7ccddad77513ab",
+    ("lmtpd", "arm64"): "89f52fb36524f5877a177dff4a713ba771fd3f91f22ed0af7238d495e143b38f",
+}
 
 
 class DovecotDeployer(Deployer):
@@ -26,11 +38,31 @@ class DovecotDeployer(Deployer):
 
     def install(self):
         arch = host.get_fact(Arch)
-        if has_systemd() and "dovecot.service" in host.get_fact(SystemdEnabled):
-            return  # already installed and running
-        _install_dovecot_package("core", arch)
-        _install_dovecot_package("imapd", arch)
-        _install_dovecot_package("lmtpd", arch)
+        with blocked_service_startup():
+            debs = []
+            for pkg in ("core", "imapd", "lmtpd"):
+                deb = _download_dovecot_package(pkg, arch)
+                if deb:
+                    debs.append(deb)
+            if debs:
+                deb_list = " ".join(debs)
+                server.shell(
+                    name="Install dovecot packages",
+                    commands=[
+                        f"dpkg --force-confdef --force-confold -i {deb_list} 2> /dev/null || true",
+                        "DEBIAN_FRONTEND=noninteractive apt-get -y --fix-broken install",
+                        f"dpkg --force-confdef --force-confold -i {deb_list}",
+                    ],
+                )
+        files.put(
+            name="Pin dovecot packages to block Debian dist-upgrades",
+            src=io.StringIO(
+                "Package: dovecot-*\n"
+                "Pin: version *\n"
+                "Pin-Priority: -1\n"
+            ),
+            dest="/etc/apt/preferences.d/pin-dovecot",
+        )
 
     def configure(self):
         configure_remote_units(self.config.mail_domain, self.units)
@@ -63,40 +95,37 @@ def _pick_url(primary, fallback):
         return fallback
 
 
-def _install_dovecot_package(package: str, arch: str):
+def _download_dovecot_package(package: str, arch: str):
+    """Download a dovecot .deb if needed, return its path (or None)."""
     arch = "amd64" if arch == "x86_64" else arch
     arch = "arm64" if arch == "aarch64" else arch
-    primary_url = f"https://download.delta.chat/dovecot/dovecot-{package}_2.3.21%2Bdfsg1-3_{arch}.deb"
-    fallback_url = f"https://github.com/chatmail/dovecot/releases/download/upstream%2F2.3.21%2Bdfsg1/dovecot-{package}_2.3.21%2Bdfsg1-3_{arch}.deb"
-    url = _pick_url(primary_url, fallback_url)
-    deb_filename = "/root/" + url.split("/")[-1]
 
-    match (package, arch):
-        case ("core", "amd64"):
-            sha256 = "dd060706f52a306fa863d874717210b9fe10536c824afe1790eec247ded5b27d"
-        case ("core", "arm64"):
-            sha256 = "e7548e8a82929722e973629ecc40fcfa886894cef3db88f23535149e7f730dc9"
-        case ("imapd", "amd64"):
-            sha256 = "8d8dc6fc00bbb6cdb25d345844f41ce2f1c53f764b79a838eb2a03103eebfa86"
-        case ("imapd", "arm64"):
-            sha256 = "178fa877ddd5df9930e8308b518f4b07df10e759050725f8217a0c1fb3fd707f"
-        case ("lmtpd", "amd64"):
-            sha256 = "2f69ba5e35363de50962d42cccbfe4ed8495265044e244007d7ccddad77513ab"
-        case ("lmtpd", "arm64"):
-            sha256 = "89f52fb36524f5877a177dff4a713ba771fd3f91f22ed0af7238d495e143b38f"
-        case _:
-            apt.packages(packages=[f"dovecot-{package}"])
-            return
+    pkg_name = f"dovecot-{package}"
+    sha256 = DOVECOT_SHA256.get((package, arch))
+    if sha256 is None:
+        apt.packages(packages=[pkg_name])
+        return None
+
+    installed_versions = host.get_fact(DebPackages).get(pkg_name, [])
+    if DOVECOT_VERSION in installed_versions:
+        return None
+
+    url_version = DOVECOT_VERSION.replace("+", "%2B")
+    deb_base = f"{pkg_name}_{url_version}_{arch}.deb"
+    primary_url = f"https://download.delta.chat/dovecot/{deb_base}"
+    fallback_url = f"https://github.com/chatmail/dovecot/releases/download/upstream%2F{url_version}/{deb_base}"
+    url = _pick_url(primary_url, fallback_url)
+    deb_filename = f"/root/{deb_base}"
 
     files.download(
-        name=f"Download dovecot-{package}",
+        name=f"Download {pkg_name}",
         src=url,
         dest=deb_filename,
         sha256sum=sha256,
         cache_time=60 * 60 * 24 * 365 * 10,  # never redownload the package
     )
 
-    apt.deb(name=f"Install dovecot-{package}", src=deb_filename)
+    return deb_filename
 
 
 def _configure_dovecot(config: Config, debug: bool = False) -> (bool, bool):
