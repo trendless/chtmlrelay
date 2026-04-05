@@ -20,7 +20,7 @@ smtpd_tls_key_file={{ config.tls_key_path }}
 smtpd_tls_security_level=may
 
 smtp_tls_CApath=/etc/ssl/certs
-smtp_tls_security_level={{ "verify" if config.tls_cert_mode == "acme" else "encrypt" }}
+smtp_tls_security_level=verify
 # Send SNI extension when connecting to other servers.
 # <https://www.postfix.org/postconf.5.html#smtp_tls_servername>
 smtp_tls_servername = hostname
@@ -87,6 +87,22 @@ inet_protocols = ipv4
 {% else %}
 inet_protocols = all
 {% endif %}
+
+# Postfix does not try IPv4 and IPv6 connections
+# concurrently as of version 3.7.11.
+#
+# When relay has both A (IPv4) and AAAA (IPv6) records,
+# but broken IPv6 connectivity,
+# every second message is delayed by the connection timeout
+# <https://www.postfix.org/postconf.5.html#smtp_connect_timeout>
+# which defaults to 30 seconds. Reducing timeouts is not a solution
+# as this will result in a failure to connect to slow servers.
+#
+# As a workaround we always prefer IPv4 when it is available.
+# 
+# The setting is documented at
+# <https://www.postfix.org/postconf.5.html#smtp_address_preference>
+smtp_address_preference=ipv4
 
 virtual_transport = lmtp:unix:private/dovecot-lmtp
 virtual_mailbox_domains = {{ config.mail_domain }}
