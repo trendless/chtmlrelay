@@ -6,7 +6,7 @@ import os
 import shutil
 import subprocess
 import sys
-from io import StringIO
+from io import BytesIO, StringIO
 from pathlib import Path
 
 from chatmaild.config import read_config
@@ -478,6 +478,14 @@ class ChatmailDeployer(Deployer):
         self.mail_domain = mail_domain
 
     def install(self):
+        files.put(
+            name="Disable installing recommended packages globally",
+            src=BytesIO(b'APT::Install-Recommends "false";\n'),
+            dest="/etc/apt/apt.conf.d/00InstallRecommends",
+            user="root",
+            group="root",
+            mode="644",
+        )
         apt.update(name="apt update", cache_time=24 * 3600)
         apt.upgrade(name="upgrade apt packages", auto_remove=True)
 
@@ -489,10 +497,6 @@ class ChatmailDeployer(Deployer):
         apt.packages(
             name="Install rsync",
             packages=["rsync"],
-        )
-        apt.packages(
-            name="Ensure cron is installed",
-            packages=["cron"],
         )
 
     def configure(self):
