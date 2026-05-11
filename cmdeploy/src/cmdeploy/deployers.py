@@ -370,7 +370,7 @@ class ChatmailVenvDeployer(Deployer):
 
     def configure(self):
         _configure_remote_venv_with_chatmaild(self, self.config)
-        configure_remote_units(self, self.config.mail_domain, self.units)
+        configure_remote_units(self, self.config.mail_domain_bare, self.units)
 
     def activate(self):
         activate_remote_units(self, self.units)
@@ -469,7 +469,7 @@ def deploy_chatmail(config_path: Path, disable_mail: bool, website_only: bool) -
     """
     config = read_config(config_path)
     check_config(config)
-    mail_domain = config.mail_domain
+    bare_host = config.mail_domain_bare
 
     if website_only:
         Deployment().perform_stages([WebsiteDeployer(config)])
@@ -526,7 +526,7 @@ def deploy_chatmail(config_path: Path, disable_mail: bool, website_only: bool) -
                     )
                     exit(1)
 
-    tls_deployer = get_tls_deployer(config, mail_domain)
+    tls_deployer = get_tls_deployer(config, bare_host)
 
     all_deployers = [
         ChatmailDeployer(config),
@@ -534,13 +534,13 @@ def deploy_chatmail(config_path: Path, disable_mail: bool, website_only: bool) -
         FiltermailDeployer(),
         JournaldDeployer(),
         UnboundDeployer(config),
-        TurnDeployer(mail_domain),
+        TurnDeployer(bare_host),
         IrohDeployer(config.enable_iroh_relay),
         tls_deployer,
         WebsiteDeployer(config),
         ChatmailVenvDeployer(config),
         MtastsDeployer(),
-        OpendkimDeployer(mail_domain),
+        *([] if config.ipv4_relay else [OpendkimDeployer(bare_host)]),
         # Dovecot should be started before Postfix
         # because it creates authentication socket
         # required by Postfix.

@@ -5,6 +5,7 @@ import subprocess
 import time
 
 import pytest
+from chatmaild.config import is_valid_ipv4
 
 from cmdeploy import remote
 from cmdeploy.cmdeploy import get_sshexec
@@ -21,6 +22,8 @@ class TestSSHExecutor:
         assert out == out2
 
     def test_perform_initial(self, sshexec, maildomain):
+        if is_valid_ipv4(maildomain):
+            pytest.skip(f"{maildomain} is not a domain")
         res = sshexec(
             remote.rdns.perform_initial_checks, kwargs=dict(mail_domain=maildomain)
         )
@@ -61,8 +64,10 @@ class TestSSHExecutor:
         else:
             pytest.fail("didn't raise exception")
 
-    def test_opendkim_restarted(self, sshexec):
+    def test_opendkim_restarted(self, sshexec, maildomain):
         """check that opendkim is not running for longer than a day."""
+        if is_valid_ipv4(maildomain):
+            pytest.skip(f"{maildomain} is an IPv4 relay, opendkim is not installed")
         cmd = "systemctl show opendkim --timestamp=utc --property=ActiveEnterTimestamp"
         out = sshexec(call=remote.rshell.shell, kwargs=dict(command=cmd))
         datestring = out.split("=")[1]
@@ -290,4 +295,6 @@ def test_nginx_access_log_only_defined_once(sshdomain):
         kwargs=dict(command="nginx -T 2>/dev/null"),
     )
     access_logs = [l for l in conf.splitlines() if l.strip().startswith("access_log")]
-    assert len(access_logs) == 1, f"expected 1 access_log, found {len(access_logs)}: {access_logs}"
+    assert len(access_logs) == 1, (
+        f"expected 1 access_log, found {len(access_logs)}: {access_logs}"
+    )

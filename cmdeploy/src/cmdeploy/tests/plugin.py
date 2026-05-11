@@ -1,5 +1,4 @@
 import imaplib
-import ipaddress
 import itertools
 import os
 import random
@@ -10,17 +9,17 @@ import time
 from pathlib import Path
 
 import pytest
-from chatmaild.config import read_config
+from chatmaild.config import is_valid_ipv4, read_config
+from domain_validator import DomainValidator
+
+
+def format_mail_domain(raw_domain: str) -> str:
+    if is_valid_ipv4(raw_domain):
+        return f"[{raw_domain}]"
+    DomainValidator().validate_domain_re(raw_domain)
+    return raw_domain
 
 conftestdir = Path(__file__).parent
-
-
-def _is_ip(domain):
-    try:
-        ipaddress.ip_address(domain)
-        return True
-    except ValueError:
-        return False
 
 
 def pytest_configure(config):
@@ -58,7 +57,7 @@ def chatmail_config(pytestconfig):
 
 @pytest.fixture(scope="session")
 def maildomain(chatmail_config):
-    return chatmail_config.mail_domain
+    return chatmail_config.mail_domain_bare
 
 
 @pytest.fixture(scope="session")
@@ -278,7 +277,6 @@ def gencreds(chatmail_config):
 
     def gen(domain=None):
         domain = domain if domain else chatmail_config.mail_domain
-        addr_domain = f"[{domain}]" if _is_ip(domain) else domain
         while 1:
             num = next(count)
             alphanumeric = "abcdefghijklmnopqrstuvwxyz1234567890"
@@ -292,7 +290,7 @@ def gencreds(chatmail_config):
             password = "".join(
                 random.choices(alphanumeric, k=chatmail_config.password_min_length)
             )
-            yield f"{user}@{addr_domain}", f"{password}"
+            yield f"{user}@{domain}", f"{password}"
 
     return lambda domain=None: next(gen(domain))
 
@@ -317,7 +315,8 @@ class ChatmailACFactory:
 
     def _make_transport(self, domain):
         """Build a transport config dict for the given domain."""
-        addr, password = self.gencreds(domain)
+        domain_deliverable = format_mail_domain(domain)
+        addr, password = self.gencreds(domain_deliverable)
         transport = {
             "addr": addr,
             "password": password,
@@ -326,7 +325,7 @@ class ChatmailACFactory:
             "imapServer": domain,
             "smtpServer": domain,
         }
-        if self.chatmail_config.tls_cert_mode == "self":
+        if domain.startswith("_") or is_valid_ipv4(domain):
             transport["certificateChecks"] = "acceptInvalidCertificates"
         return transport
 
@@ -341,8 +340,9 @@ class ChatmailACFactory:
         accounts = []
         for _ in range(num):
             account = self.dc.add_account()
-            addr, password = self.gencreds(domain)
-            if _is_ip(domain):
+            domain_deliverable = format_mail_domain(domain)
+            addr, password = self.gencreds(domain_deliverable)
+            if is_valid_ipv4(domain):
                 # Use DCLOGIN scheme with explicit server hosts,
                 # matching how madmail presents its addresses to users.
                 qr = (
@@ -416,10 +416,10 @@ class Remote:
     def iter_output(self, logcmd="", ready=None):
         getjournal = "journalctl -f" if not logcmd else logcmd
         print(self.sshdomain)
-        match self.sshdomain:
-            case "@local": command = []
-            case "localhost": command = []
-            case _: command = ["ssh", f"root@{self.sshdomain}"]
+        if self.sshdomain in ("@local", "localhost"):
+            command = []
+        else:
+            command = ["ssh", f"root@{self.sshdomain}"]
         [command.append(arg) for arg in getjournal.split()]
         popen = subprocess.Popen(
             command,
