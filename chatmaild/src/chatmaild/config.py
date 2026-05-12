@@ -10,12 +10,7 @@ from chatmaild.user import User
 def read_config(inipath):
     assert Path(inipath).exists(), inipath
     cfg = iniconfig.IniConfig(inipath)
-    params = cfg.sections["params"]
-    default_config_content = get_default_config_content(params["mail_domain"])
-    df_params = iniconfig.IniConfig("ini", data=default_config_content)["params"]
-    new_params = dict(df_params.items())
-    new_params.update(params)
-    return Config(inipath, params=new_params)
+    return Config(inipath, params=cfg.sections["params"])
 
 
 class Config:
@@ -36,16 +31,18 @@ class Config:
 
         self.max_user_send_per_minute = int(params.get("max_user_send_per_minute", 60))
         self.max_user_send_burst_size = int(params.get("max_user_send_burst_size", 10))
-        self.max_mailbox_size = params["max_mailbox_size"]
-        self.max_message_size = int(params.get("max_message_size", "31457280"))
-        self.delete_mails_after = params["delete_mails_after"]
-        self.delete_large_after = params["delete_large_after"]
-        self.delete_inactive_users_after = int(params["delete_inactive_users_after"])
-        self.username_min_length = int(params["username_min_length"])
-        self.username_max_length = int(params["username_max_length"])
-        self.password_min_length = int(params["password_min_length"])
-        self.passthrough_senders = params["passthrough_senders"].split()
-        self.passthrough_recipients = params["passthrough_recipients"].split()
+        self.max_mailbox_size = params.get("max_mailbox_size", "500M")
+        self.max_message_size = int(params.get("max_message_size", 31457280))
+        self.delete_mails_after = params.get("delete_mails_after", "20")
+        self.delete_large_after = params.get("delete_large_after", "7")
+        self.delete_inactive_users_after = int(
+            params.get("delete_inactive_users_after", 90)
+        )
+        self.username_min_length = int(params.get("username_min_length", 9))
+        self.username_max_length = int(params.get("username_max_length", 9))
+        self.password_min_length = int(params.get("password_min_length", 9))
+        self.passthrough_senders = params.get("passthrough_senders", "").split()
+        self.passthrough_recipients = params.get("passthrough_recipients", "").split()
         self.www_folder = params.get("www_folder", "")
         self.filtermail_smtp_port = int(params.get("filtermail_smtp_port", "10080"))
         self.filtermail_smtp_port_incoming = int(
@@ -164,31 +161,7 @@ def get_default_config_content(mail_domain, **overrides):
     for name, value in extra.items():
         new_line = f"{name} = {value}"
         new_lines.append(new_line)
-
-    content = "\n".join(new_lines)
-
-    # apply testrun privacy overrides
-
-    if mail_domain.endswith(".testrun.org"):
-        override_inipath = inidir.joinpath("override-testrun.ini")
-        privacy = iniconfig.IniConfig(override_inipath)["privacy"]
-        lines = []
-        for line in content.split("\n"):
-            for key, value in privacy.items():
-                value_lines = value.format(mail_domain=mail_domain).strip().split("\n")
-                if not line.startswith(f"{key} =") or not value_lines:
-                    continue
-                if len(value_lines) == 1:
-                    lines.append(f"{key} = {value}")
-                else:
-                    lines.append(f"{key} =")
-                    for vl in value_lines:
-                        lines.append(f"    {vl}")
-                break
-            else:
-                lines.append(line)
-        content = "\n".join(lines)
-    return content
+    return "\n".join(new_lines)
 
 
 def is_valid_ipv4(address: str) -> bool:
