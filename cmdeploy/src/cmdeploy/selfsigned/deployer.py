@@ -1,8 +1,8 @@
 import shlex
 
-from pyinfra.operations import apt, server
+from pyinfra.operations import server
 
-from cmdeploy.basedeploy import Deployer
+from ..basedeploy import Deployer
 
 
 def openssl_selfsigned_args(domain, cert_path, key_path, days=36500):
@@ -18,6 +18,8 @@ def openssl_selfsigned_args(domain, cert_path, key_path, days=36500):
         "-keyout", str(key_path),
         "-out", str(cert_path),
         "-subj", f"/CN={domain}",
+        # Mark as end-entity cert so it cannot be used as a CA to sign others.
+        "-addext", "basicConstraints=critical,CA:FALSE",
         "-addext", "extendedKeyUsage=serverAuth,clientAuth",
         "-addext",
         f"subjectAltName=DNS:{domain},DNS:www.{domain},DNS:mta-sts.{domain}",
@@ -32,11 +34,7 @@ class SelfSignedTlsDeployer(Deployer):
         self.cert_path = "/etc/ssl/certs/mailserver.pem"
         self.key_path = "/etc/ssl/private/mailserver.key"
 
-    def install(self):
-        apt.packages(
-            name="Install openssl",
-            packages=["openssl"],
-        )
+
 
     def configure(self):
         args = openssl_selfsigned_args(
@@ -50,3 +48,5 @@ class SelfSignedTlsDeployer(Deployer):
 
     def activate(self):
         pass
+
+

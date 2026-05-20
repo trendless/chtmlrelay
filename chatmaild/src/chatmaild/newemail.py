@@ -25,13 +25,19 @@ def create_newemail_dict(config: Config):
     return dict(email=f"{user}@{config.mail_domain}", password=f"{password}")
 
 
-def create_dclogin_url(email, password):
+def create_dclogin_url(config, email, password):
     """Build a dclogin: URL with credentials and self-signed cert acceptance.
 
     Uses ic=3 (AcceptInvalidCertificates) so chatmail clients
     can connect to servers with self-signed TLS certificates.
     """
-    return f"dclogin:{quote(email, safe='@')}?p={quote(password, safe='')}&v=1&ic=3"
+    if config.ipv4_relay:
+        imap_host = "&ih=" + config.ipv4_relay
+        smtp_host = "&sh=" + config.ipv4_relay
+    else:
+        imap_host = ""
+        smtp_host = ""
+    return f"dclogin:{quote(email, safe='@[]')}?p={quote(password, safe='')}&v=1{imap_host}{smtp_host}&ic=3"
 
 
 def print_new_account():
@@ -40,7 +46,9 @@ def print_new_account():
 
     result = dict(email=creds["email"], password=creds["password"])
     if config.tls_cert_mode == "self":
-        result["dclogin_url"] = create_dclogin_url(creds["email"], creds["password"])
+        result["dclogin_url"] = create_dclogin_url(
+            config, creds["email"], creds["password"]
+        )
 
     print("Content-Type: application/json")
     print("")

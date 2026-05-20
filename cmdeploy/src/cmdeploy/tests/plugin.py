@@ -9,15 +9,18 @@ import time
 from pathlib import Path
 
 import pytest
-from chatmaild.config import read_config
+from chatmaild.config import is_valid_ipv4, read_config
+from domain_validator import DomainValidator
+
+
+def format_mail_domain(raw_domain: str) -> str:
+    if is_valid_ipv4(raw_domain):
+        return f"[{raw_domain}]"
+    DomainValidator().validate_domain_re(raw_domain)
+    return raw_domain
+
 
 conftestdir = Path(__file__).parent
-
-
-def pytest_addoption(parser):
-    parser.addoption(
-        "--slow", action="store_true", default=False, help="also run slow tests"
-    )
 
 
 def pytest_configure(config):
@@ -27,14 +30,12 @@ def pytest_configure(config):
     )
 
 
-def pytest_runtest_setup(item):
-    markers = list(item.iter_markers(name="slow"))
-    if markers:
-        if not item.config.getoption("--slow"):
-            pytest.skip("skipping slow test, use --slow to run")
-
-
 def _get_chatmail_config():
+    inipath = os.environ.get("CHATMAIL_INI")
+    if inipath:
+        path = Path(inipath).resolve()
+        return read_config(path), path
+
     current = Path().resolve()
     while 1:
         path = current.joinpath("chatmail.ini").resolve()
@@ -57,7 +58,7 @@ def chatmail_config(pytestconfig):
 
 @pytest.fixture(scope="session")
 def maildomain(chatmail_config):
-    return chatmail_config.mail_domain
+    return chatmail_config.mail_domain_bare
 
 
 @pytest.fixture(scope="session")
@@ -315,7 +316,8 @@ class ChatmailACFactory:
 
     def _make_transport(self, domain):
         """Build a transport config dict for the given domain."""
-        addr, password = self.gencreds(domain)
+        domain_deliverable = format_mail_domain(domain)
+        addr, password = self.gencreds(domain_deliverable)
         transport = {
             "addr": addr,
             "password": password,
@@ -324,7 +326,7 @@ class ChatmailACFactory:
             "imapServer": domain,
             "smtpServer": domain,
         }
-        if self.chatmail_config.tls_cert_mode == "self":
+        if domain.startswith("_") or is_valid_ipv4(domain):
             transport["certificateChecks"] = "acceptInvalidCertificates"
         return transport
 
@@ -339,9 +341,23 @@ class ChatmailACFactory:
         accounts = []
         for _ in range(num):
             account = self.dc.add_account()
-            future = account.add_or_update_transport.future(
-                self._make_transport(domain)
-            )
+            domain_deliverable = format_mail_domain(domain)
+            addr, password = self.gencreds(domain_deliverable)
+            if is_valid_ipv4(domain):
+                # Use DCLOGIN scheme with explicit server hosts,
+                # matching how madmail presents its addresses to users.
+                qr = (
+                    f"dclogin:{addr}"
+                    f"?p={password}&v=1"
+                    f"&ih={domain}&ip=993"
+                    f"&sh={domain}&sp=465"
+                    f"&ic=3&ss=default"
+                )
+                future = account.add_transport_from_qr.future(qr)
+            else:
+                future = account.add_or_update_transport.future(
+                    self._make_transport(domain)
+                )
             futures.append(future)
 
             # ensure messages stay in INBOX so that they can be
@@ -388,34 +404,50 @@ def cmfactory(rpc, gencreds, maildomain, chatmail_config):
 
 @pytest.fixture
 def remote(sshdomain):
-    return Remote(sshdomain)
+    r = Remote(sshdomain)
+    yield r
+    r.close()
 
 
 class Remote:
     def __init__(self, sshdomain):
         self.sshdomain = sshdomain
+        self._procs = []
 
     def iter_output(self, logcmd="", ready=None):
         getjournal = "journalctl -f" if not logcmd else logcmd
         print(self.sshdomain)
-        match self.sshdomain:
-            case "@local": command = []
-            case "localhost": command = []
-            case _: command = ["ssh", f"root@{self.sshdomain}"]
+        if self.sshdomain in ("@local", "localhost"):
+            command = []
+        else:
+            command = ["ssh", f"root@{self.sshdomain}"]
         [command.append(arg) for arg in getjournal.split()]
-        self.popen = subprocess.Popen(
+        popen = subprocess.Popen(
             command,
+            stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
         )
-        while 1:
-            line = self.popen.stdout.readline()
-            res = line.decode().strip().lower()
-            if not res:
-                break
-            if ready is not None:
-                ready()
-                ready = None
-            yield res
+        self._procs.append(popen)
+        try:
+            while 1:
+                line = popen.stdout.readline()
+                res = line.decode().strip().lower()
+                if not res:
+                    break
+                if ready is not None:
+                    ready()
+                    ready = None
+                yield res
+        finally:
+            popen.terminate()
+            popen.wait()
+
+    def close(self):
+        while self._procs:
+            proc = self._procs.pop()
+            proc.kill()
+            proc.wait()
 
 
 @pytest.fixture
@@ -435,6 +467,11 @@ def cmsetup(maildomain, gencreds, ssl_context):
     return CMSetup(maildomain, gencreds, ssl_context)
 
 
+@pytest.fixture
+def cmsetup2(maildomain2, gencreds, ssl_context):
+    return CMSetup(maildomain2, gencreds, ssl_context)
+
+
 class CMSetup:
     def __init__(self, maildomain, gencreds, ssl_context):
         self.maildomain = maildomain
@@ -445,7 +482,7 @@ class CMSetup:
         print(f"Creating {num} online users")
         users = []
         for i in range(num):
-            addr, password = self.gencreds()
+            addr, password = self.gencreds(format_mail_domain(self.maildomain))
             user = CMUser(self.maildomain, addr, password, self.ssl_context)
             assert user.smtp
             users.append(user)

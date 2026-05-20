@@ -23,17 +23,29 @@ class TestCmdline:
         run = parser.parse_args(["run"])
         assert init and run
 
-    def test_init_not_overwrite(self, capsys):
-        assert main(["init", "chat.example.org"]) == 0
+    def test_init_not_overwrite(self, capsys, tmp_path, monkeypatch):
+        monkeypatch.delenv("CHATMAIL_INI", raising=False)
+        inipath = tmp_path / "chatmail.ini"
+        args = ["init", "--config", str(inipath), "chat.example.org"]
+        assert main(args) == 0
         capsys.readouterr()
 
-        assert main(["init", "chat.example.org"]) == 1
+        assert main(args) == 1
         out, err = capsys.readouterr()
         assert "path exists" in out.lower()
 
-        assert main(["init", "chat.example.org", "--force"]) == 0
+        args.insert(1, "--force")
+        assert main(args) == 0
         out, err = capsys.readouterr()
         assert "deleting config file" in out.lower()
+
+    def test_dns_skip_on_ip(self, capsys, tmp_path, monkeypatch):
+        monkeypatch.delenv("CHATMAIL_INI", raising=False)
+        inipath = tmp_path / "chatmail.ini"
+        assert main(["init", "--config", str(inipath), "1.3.3.7"]) == 0
+        assert main(["dns", "--config", str(inipath)]) == 0
+        out, err = capsys.readouterr()
+        assert out == "[WARNING] 1.3.3.7 is not a domain, skipping DNS checks.\n"
 
 
 def test_www_folder(example_config, tmp_path):
