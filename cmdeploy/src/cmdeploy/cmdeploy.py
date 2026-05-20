@@ -84,13 +84,24 @@ def run_cmd_options(parser):
     add_ssh_host_option(parser)
 
 
+def _warn_unused_settings(unused_keys, out):
+    if unused_keys:
+        names = ", ".join(unused_keys)
+        out.red(
+            f"WARNING: chatmail.ini contains settings that have no effect: {names}\n"
+            "Please remove them from chatmail.ini."
+        )
+
+
 def run_cmd(args, out):
     """Deploy chatmail services on the remote server."""
 
-    ssh_host = args.ssh_host if args.ssh_host else args.config.mail_domain
+    ssh_host = args.ssh_host if args.ssh_host else args.config.mail_domain_bare
     sshexec = get_sshexec(ssh_host)
     require_iroh = args.config.enable_iroh_relay
     strict_tls = args.config.tls_cert_mode == "acme"
+    if args.config.ipv4_relay:
+        args.dns_check_disabled = True
     if not args.dns_check_disabled:
         remote_data = dns.get_initial_remote_data(sshexec, args.config.mail_domain)
         if not dns.check_initial_remote_data(remote_data, strict_tls=strict_tls, print=out.red):
@@ -101,17 +112,11 @@ def run_cmd(args, out):
     env["CHATMAIL_WEBSITE_ONLY"] = "True" if args.website_only else ""
     env["CHATMAIL_DISABLE_MAIL"] = "True" if args.disable_mail else ""
     env["CHATMAIL_REQUIRE_IROH"] = "True" if require_iroh else ""
-    if not args.dns_check_disabled:
-        env["CHATMAIL_ADDR_V4"] = remote_data.get("A") or ""
-        env["CHATMAIL_ADDR_V6"] = remote_data.get("AAAA") or ""
     deploy_path = importlib.resources.files(__package__).joinpath("run.py").resolve()
     pyinf = "pyinfra --dry" if args.dry_run else "pyinfra"
 
     cmd = f"{pyinf} --ssh-user root {ssh_host} {deploy_path} -y"
-    if ssh_host in ["localhost", "@docker"]:
-        if ssh_host == "@docker":
-            env["CHATMAIL_NOPORTCHECK"] = "True"
-            env["CHATMAIL_NOSYSCTL"] = "True"
+    if ssh_host == "localhost":
         cmd = f"{pyinf} @local {deploy_path} -y"
 
     if version.parse(pyinfra.__version__) < version.parse("3"):
@@ -125,8 +130,11 @@ def run_cmd(args, out):
         elif not args.dns_check_disabled and strict_tls and not remote_data["acme_account_url"]:
             out.red("Deploy completed but letsencrypt not configured")
             out.red("Run 'cmdeploy run' again")
+        elif args.config.ipv4_relay:
+            out.green("Deploy completed.")
         else:
             out.green("Deploy completed, call `cmdeploy dns` next.")
+        _warn_unused_settings(args.config._unused_keys, out)
         return 0
     except subprocess.CalledProcessError:
         out.red("Deploy failed")
@@ -146,6 +154,10 @@ def dns_cmd_options(parser):
 
 def dns_cmd(args, out):
     """Check DNS entries and optionally generate dns zone file."""
+    if args.config.ipv4_relay:
+        ipv4 = args.config.ipv4_relay
+        print(f"[WARNING] {ipv4} is not a domain, skipping DNS checks.")
+        return 0
     ssh_host = args.ssh_host if args.ssh_host else args.config.mail_domain
     sshexec = get_sshexec(ssh_host, verbose=args.verbose)
     tls_cert_mode = args.config.tls_cert_mode
@@ -183,7 +195,7 @@ def status_cmd_options(parser):
 def status_cmd(args, out):
     """Display status for online chatmail instance."""
 
-    ssh_host = args.ssh_host if args.ssh_host else args.config.mail_domain
+    ssh_host = args.ssh_host if args.ssh_host else args.config.mail_domain_bare
     sshexec = get_sshexec(ssh_host, verbose=args.verbose)
 
     out.green(f"chatmail domain: {args.config.mail_domain}")
@@ -197,12 +209,6 @@ def status_cmd(args, out):
 
 
 def test_cmd_options(parser):
-    parser.add_argument(
-        "--slow",
-        dest="slow",
-        action="store_true",
-        help="also run slow tests",
-    )
     add_ssh_host_option(parser)
 
 
@@ -210,6 +216,7 @@ def test_cmd(args, out):
     """Run local and online tests for chatmail deployment."""
 
     env = os.environ.copy()
+    env["CHATMAIL_INI"] = str(args.inipath.absolute())
     if args.ssh_host:
         env["CHATMAIL_SSH"] = args.ssh_host
 
@@ -223,8 +230,6 @@ def test_cmd(args, out):
         "-v",
         "--durations=5",
     ]
-    if args.slow:
-        pytest_args.append("--slow")
     ret = out.run_ret(pytest_args, env=env)
     return ret
 
@@ -316,7 +321,7 @@ def add_ssh_host_option(parser):
     parser.add_argument(
         "--ssh-host",
         dest="ssh_host",
-        help="Run commands on 'localhost', via '@docker', or on a specific SSH host "
+        help="Run commands on 'localhost' or on a specific SSH host "
         "instead of chatmail.ini's mail_domain.",
     )
 
@@ -378,9 +383,7 @@ def get_parser():
 
 def get_sshexec(ssh_host: str, verbose=True):
     if ssh_host in ["localhost", "@local"]:
-        return LocalExec(verbose, docker=False)
-    elif ssh_host == "@docker":
-        return LocalExec(verbose, docker=True)
+        return LocalExec(verbose)
     if verbose:
         print(f"[ssh] login to {ssh_host}")
     return SSHExec(ssh_host, verbose=verbose)

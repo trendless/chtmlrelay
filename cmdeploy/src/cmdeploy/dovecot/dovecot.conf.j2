@@ -7,6 +7,7 @@ listen = 0.0.0.0
 protocols = imap lmtp
 
 auth_mechanisms = plain
+auth_username_chars = abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890.-_@[]
 
 {% if debug == true %}
 auth_verbose = yes
@@ -133,6 +134,11 @@ protocol lmtp {
   # mail_lua and push_notification_lua are needed for Lua push notification handler.
   # <https://doc.dovecot.org/2.3/configuration_manual/push_notification/#configuration>
   mail_plugins = $mail_plugins mail_lua notify push_notification push_notification_lua
+
+  # Disable fsync for LMTP. May lose delivered message,
+  # but unlikely to cause problems with multiple relays.
+  # https://doc.dovecot.org/2.3/admin_manual/mailbox_formats/#fsyncing
+  mail_fsync = never
 }
 
 plugin {
@@ -144,12 +150,26 @@ plugin {
 }
 
 plugin {
-  # for now we define static quota-rules for all users 
   quota = maildir:User quota
-  quota_rule = *:storage={{ config.max_mailbox_size }}
   quota_max_mail_size={{ config.max_message_size }}
   quota_grace = 0
-  # quota_over_flag_value = TRUE
+
+  quota_rule = *:storage={{ config.max_mailbox_size_mb }}M
+
+  # Trigger at 75%% of quota, expire oldest messages down to 70%%.
+  # The percentages are chosen to prevent current Delta Chat users
+  # from seeing "quota warnings" which trigger at 80% and 95%.
+
+  quota_warning = storage=75%% quota-warning {{ config.max_mailbox_size_mb * 70 // 100 }} {{ config.mailboxes_dir }}/%u
+}
+
+service quota-warning {
+  executable = script /usr/local/lib/chatmaild/venv/bin/chatmail-quota-expire
+  user = vmail
+  unix_listener quota-warning {
+     user = vmail
+     mode = 0600
+  }
 }
 
 # push_notification configuration
@@ -252,6 +272,9 @@ protocol imap {
   # sort -sn <(sed 's/ / C: /' *.in) <(sed 's/ / S: /' cat *.out)
 
   rawlog_dir = %h 
+
+  # Disable fsync for IMAP. May lose IMAP changes like setting flags. 
+  mail_fsync = never
 } 
 {% endif %}
 
