@@ -102,8 +102,12 @@ short overview of ``chatmaild`` services:
    Apple/Google/Huawei.
 
 -  `chatmail-expire <https://github.com/chatmail/relay/blob/main/chatmaild/src/chatmaild/expire.py>`_
-   deletes users if they have not logged in for a longer while.
-   The timeframe can be configured in ``chatmail.ini``.
+   deletes old messages, large messages, and entire mailboxes
+   of users who have not logged in for longer than
+   ``delete_inactive_users_after`` days.
+
+-  ``chatmail-quota-expire`` is called by Dovecot's ``quota_warning`` mechanism
+   and will automatically remove oldest messages to keep mailboxes well under ``max_mailbox_size``.
 
 -  `lastlogin <https://github.com/chatmail/relay/blob/main/chatmaild/src/chatmaild/lastlogin.py>`_
    is contacted by Dovecot when a user logs in and stores the date of
@@ -149,6 +153,7 @@ Chatmail relay dependency diagram
         autoconfig.xml --- dovecot;
         postfix --- |10080|filtermail-outgoing;
         postfix --- |10081|filtermail-incoming;
+        postfix --- |10083|filtermail-transport;
         filtermail-outgoing --- |10025 reinject|postfix;
         filtermail-incoming --- |10026 reinject|postfix;
         dovecot --- |doveauth.socket|doveauth;
@@ -156,6 +161,8 @@ Chatmail relay dependency diagram
         /home/vmail/.../user"];
         dovecot --- |lastlogin.socket|lastlogin;
         dovecot --- chatmail-metadata;
+        dovecot --- |quota-warning|chatmail-quota-expire;
+        chatmail-quota-expire --- maildir;
         lastlogin --- maildir;
         doveauth --- maildir;
         chatmail-expire-daily --- maildir;
@@ -258,7 +265,8 @@ from the chatmail relay server.
 Email domain authentication (DKIM)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Chatmail relays enforce :rfc:`DKIM <6376>` to authenticate incoming emails.
+Chatmail relays enforce :rfc:`DKIM <6376>` to authenticate incoming emails
+(except for :ref:`IP-only relays <iponly>`).
 Incoming emails must have a valid DKIM signature with
 Signing Domain Identifier (SDID, ``d=`` parameter in the DKIM-Signature
 header) equal to the ``From:`` header domain. This property is checked
@@ -289,9 +297,7 @@ ensured by ``filtermail`` proxy.
 TLS requirements
 ~~~~~~~~~~~~~~~~
 
-Postfix is configured to require valid TLS by setting
-`smtp_tls_security_level <https://www.postfix.org/postconf.5.html#smtp_tls_security_level>`_
-to ``verify``.
+Filtermail (used for delivery) requires a valid TLS.
 
 You can test it by resolving ``MX`` records of your relay domain and
 then connecting to MX relays (e.g ``mx.example.org``) with
