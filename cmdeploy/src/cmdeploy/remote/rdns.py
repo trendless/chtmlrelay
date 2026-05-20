@@ -57,27 +57,32 @@ def get_dkim_entry(mail_domain, pre_command, dkim_selector):
     dkim_value_raw = f"v=DKIM1;k=rsa;p={dkim_pubkey};s=email;t=s"
     dkim_value = '" "'.join(re.findall(".{1,255}", dkim_value_raw))
     web_dkim_value = "".join(re.findall(".{1,255}", dkim_value_raw))
+    name = f"{dkim_selector}._domainkey.{mail_domain}."
     return (
-        f'{dkim_selector}._domainkey.{mail_domain}. TXT "{dkim_value}"',
-        f'{dkim_selector}._domainkey.{mail_domain}. TXT "{web_dkim_value}"',
+        f'{name:<40} 3600   IN  TXT    "{dkim_value}"',
+        f'{name:<40} 3600   IN  TXT    "{web_dkim_value}"',
     )
 
 
-def query_dns(typ, domain):
-    # Get autoritative nameserver from the SOA record.
-    soa_answers = [
+def get_authoritative_ns(domain):
+    ns_replies = [
         x.split()
         for x in shell(
-            f"dig -r -q {domain} -t SOA +noall +authority +answer", print=log_progress
+            f"dig -r -q {domain} -t NS +noall +authority +answer", print=log_progress
         ).split("\n")
     ]
-    soa = [a for a in soa_answers if len(a) >= 3 and a[3] == "SOA"]
-    if not soa:
+    filtered_replies = [a for a in ns_replies if len(a) >= 5 and a[3] == "NS"]
+    if not filtered_replies:
         return
-    ns = soa[0][4]
+    return filtered_replies[0][4]
+
+
+def query_dns(typ, domain):
+    ns = get_authoritative_ns(domain)
 
     # Query authoritative nameserver directly to bypass DNS cache.
-    res = shell(f"dig @{ns} -r -q {domain} -t {typ} +short", print=log_progress)
+    direct_ns = f"@{ns}" if ns else ""
+    res = shell(f"dig {direct_ns} -r -q {domain} -t {typ} +short", print=log_progress)
     return next((line for line in res.split("\n") if not line.startswith(";")), "")
 
 
@@ -94,7 +99,7 @@ def check_zonefile(zonefile, verbose=True):
         if not zf_line.strip() or zf_line.startswith(";"):
             continue
         print(f"dns-checking {zf_line!r}") if verbose else log_progress("")
-        zf_domain, zf_typ, zf_value = zf_line.split(maxsplit=2)
+        zf_domain, _ttl, _in, zf_typ, zf_value = zf_line.split(None, 4)
         zf_domain = zf_domain.rstrip(".")
         zf_value = zf_value.strip()
         query_value = query_dns(zf_typ, zf_domain)
