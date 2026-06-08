@@ -171,16 +171,14 @@ class UnboundDeployer(Deployer):
                 "unbound-anchor -a /var/lib/unbound/root.key || true",
             ],
         )
-        if self.config.disable_ipv6:
-            self.ensure_directory(
-                path="/etc/unbound/unbound.conf.d",
-            )
-            self.put_template(
-                "unbound/unbound.conf.j2",
-                "/etc/unbound/unbound.conf.d/chatmail.conf",
-            )
-        else:
-            self.remove_file("/etc/unbound/unbound.conf.d/chatmail.conf")
+        self.ensure_directory(
+            path="/etc/unbound/unbound.conf.d",
+        )
+        self.put_template(
+            "unbound/unbound.conf.j2",
+            "/etc/unbound/unbound.conf.d/chatmail.conf",
+            disable_ipv6=self.config.disable_ipv6,
+        )
 
     def activate(self):
         server.shell(
@@ -514,6 +512,8 @@ def deploy_chatmail(config_path: Path, disable_mail: bool, website_only: bool) -
             (["master", "smtpd"], config.postfix_reinject_port_incoming),
             ("filtermail", config.filtermail_smtp_port),
             ("filtermail", config.filtermail_smtp_port_incoming),
+            ("filtermail", config.filtermail_http_port_incoming),
+            ("filtermail", config.filtermail_lmtp_port_transport),
         ]
         for service, port in port_services:
             print(f"Checking if port {port} is available for {service}...")
